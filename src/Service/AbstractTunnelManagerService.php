@@ -37,7 +37,7 @@ abstract class AbstractTunnelManagerService
 
     public function __construct(
         protected AdaptiveResponse $adaptiveResponse,
-        protected Security $security,
+        protected \Symfony\Bundle\SecurityBundle\Security $security,
         protected TunnelSessionCrudService $tunnelSessionCrudService,
         protected UrlGeneratorInterface $urlGenerator,
     ) {
