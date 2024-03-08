@@ -2,7 +2,7 @@
 
 namespace Wexample\SymfonyTunnels;
 
-use Wexample\SymfonyHelpers\AbstractBundle;
+use Wexample\SymfonyHelpers\Class\AbstractBundle;
 
 class WexampleSymfonyTunnelsBundle extends AbstractBundle
 {
