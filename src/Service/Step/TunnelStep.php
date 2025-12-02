@@ -120,7 +120,7 @@ abstract class TunnelStep
     public function preventAccess(): bool
     {
         // By default, allow access depending on direct access policy.
-        return !$this->allowDirectAccess();
+        return ! $this->allowDirectAccess();
     }
 
     #[Pure]
@@ -165,8 +165,8 @@ abstract class TunnelStep
     public function isLast(): bool
     {
         return $this->getPosition() === count(
-                $this->getManager()->getTunnelSteps()
-            ) - 1;
+            $this->getManager()->getTunnelSteps()
+        ) - 1;
     }
 
     public function initAsCurrentStep(): void

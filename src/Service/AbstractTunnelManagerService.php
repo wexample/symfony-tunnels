@@ -17,7 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Security;
 use Wexample\SymfonyHelpers\Helper\VariableHelper;
 use Wexample\SymfonyTunnels\Service\Step\TunnelStep;
 
@@ -53,7 +52,7 @@ abstract class AbstractTunnelManagerService
         $this->setCurrentRequest($request);
 
         // Redirect to first step.
-        if (!$stepName) {
+        if (! $stepName) {
             $step = $this->getStepByPosition(0);
 
             return new RedirectResponse(
@@ -66,7 +65,7 @@ abstract class AbstractTunnelManagerService
 
         $step = $this->getStepByName($stepName);
 
-        if (!$step) {
+        if (! $step) {
             return null;
         }
 
@@ -180,7 +179,7 @@ abstract class AbstractTunnelManagerService
         /** @var User $user */
         $user = $this->security->getUser();
 
-        if (!$sessionId) {
+        if (! $sessionId) {
             $sessionId = (int) $request->get('tunnel');
         }
 
@@ -192,13 +191,14 @@ abstract class AbstractTunnelManagerService
             // Assign only if not terminated.
             if ($session
                 // Tunnel is not terminated.
-                && !$session->hasStatus(TunnelSession::STATUS_COMPLETED)
+                && ! $session->hasStatus(TunnelSession::STATUS_COMPLETED)
                 // Date has not expired.
                 && $session->getDateCreated() > (new DateTime())->modify('-1 day')
                 // Browser IP does not change.
                 && $session->getIpV4() === $request->getClientIp()
                 // No user or user is the same as current.
-                && (is_null($session->getUser())
+                && (
+                    is_null($session->getUser())
                     || (
                         $session->getUser()->getId() === $user->getId()
                     )
@@ -208,7 +208,7 @@ abstract class AbstractTunnelManagerService
             }
         }
 
-        if (!$this->tunnelSession) {
+        if (! $this->tunnelSession) {
             $this->tunnelSession = $this
                 ->tunnelSessionCrudService
                 ->createAndSaveTunnelSession(
@@ -298,7 +298,7 @@ abstract class AbstractTunnelManagerService
 
                 // This is a previous step and is not complete.
                 if ($stepPosition < $currentPosition &&
-                    !$step->isCompleted()) {
+                    ! $step->isCompleted()) {
                     $newPosition = $stepPosition;
                 }
             }
@@ -395,7 +395,7 @@ abstract class AbstractTunnelManagerService
                 ->setCompleted();
         }
 
-        if (!$this->getCurrentStep()->isLast()) {
+        if (! $this->getCurrentStep()->isLast()) {
             $this->adaptiveResponse->setRedirect(
                 new RedirectResponse(
                     $this->getStepUrlForOffset(1)
@@ -427,7 +427,7 @@ abstract class AbstractTunnelManagerService
                 ->setCompleted();
         }
 
-        if (!$this->getCurrentStep()->isLast()) {
+        if (! $this->getCurrentStep()->isLast()) {
             return $this->redirectToOffset(1);
         }
 
