@@ -17,6 +17,6 @@
   ],
   "require": {
     "php": ">=8.2",
-    "wexample/symfony-helpers": "1.0.64"
+    "wexample/symfony-helpers": "1.0.66"
   }
 }
