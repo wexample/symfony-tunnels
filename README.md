@@ -1,6 +1,6 @@
 # wexample/symfony-tunnels
 
-Version: 1.0.65
+Version: 1.0.66
 
 A tunnels service for Symfony
 
@@ -130,7 +130,7 @@ Refer to each package's documentation for specific version compatibility require
 ## Dependencies
 
 - php: >=8.2
-- wexample/symfony-helpers: ==1.0.70
+- wexample/symfony-helpers: 1.0.72
 
 
 # About us
