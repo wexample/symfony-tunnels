@@ -3,7 +3,7 @@
   "description": "A tunnels service for Symfony",
   "type": "library",
   "license": "MIT",
-  "version": "1.0.66",
+  "version": "1.0.67",
   "autoload": {
     "psr-4": {
       "Wexample\\SymfonyTunnels\\": "src/"
@@ -17,6 +17,6 @@
   ],
   "require": {
     "php": ">=8.2",
-    "wexample/symfony-helpers": "1.0.72"
+    "wexample/symfony-helpers": "1.0.74"
   }
 }
