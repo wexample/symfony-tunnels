@@ -11,6 +11,7 @@ use Wexample\SymfonyTunnels\Service\FormProcessor\Traits\TunnelFormProcessorTrai
 trait FormTunnelStepTrait
 {
     protected AbstractFormProcessor $formProcessor;
+    protected ?FormInterface $form = null;
 
     public function init(): void
     {
@@ -34,14 +35,36 @@ trait FormTunnelStepTrait
     /**
      * Overrides TunnelStep default method.
      */
-    public function handleRequest(Request $request): Response
+    public function handleRequest(Request $request): self|Response|null
     {
-        return $this
-            ->getFormProcessor()
-            ->handleStaticFormOrRenderAdaptiveResponse(
-                $this->getView(),
-                $this->getViewParams()
-            );
+        $formProcessor = $this->getFormProcessor();
+
+        if ($request->isMethod(Request::METHOD_POST)) {
+            $form = $formProcessor->handleSubmission($request);
+        } else {
+            $form = $formProcessor->createForm();
+        }
+
+        $this->form = $form;
+        $this->onFormRender($form);
+
+        $response = $formProcessor->handleSubmissionResponseFromForm($form);
+        if ($response instanceof Response) {
+            return $response;
+        }
+
+        return $this;
+    }
+
+    public function getViewParams(): array
+    {
+        $params = parent::getViewParams();
+
+        if ($this->form) {
+            $params['form'] = $this->form->createView();
+        }
+
+        return $params;
     }
 
     public function onFormRender(FormInterface $form): void
