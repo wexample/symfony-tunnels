@@ -1,6 +1,6 @@
 # wexample/symfony-tunnels
 
-Version: 1.0.84
+Version: 1.0.85
 
 A tunnels service for Symfony
 
