@@ -1,3 +1,7 @@
+docker:
+  db: {}
+domains: []
 global:
   name: symfony_tunnels
-  version: 1.0.85
+  type: app
+  version: 6.0.19
