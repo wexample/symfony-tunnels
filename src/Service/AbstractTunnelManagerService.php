@@ -200,7 +200,7 @@ abstract class AbstractTunnelManagerService
                 && (
                     is_null($session->getUser())
                     || (
-                        $session->getUser()->getId() === $user->getId()
+                        $session->getUser()->getId()->equals($user->getId())
                     )
                 )
             ) {
