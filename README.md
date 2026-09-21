@@ -1,6 +1,6 @@
 # symfony_tunnels
 
-Version: 2.0.2
+Version: 2.0.3
 
 symfony-tunnels provides an abstract framework for building sequential multi-step flows — "tunnels" — in Symfony applications: a manager service orchestrates the ordered list of steps, persists progress in a `TunnelSession` entity, and enforces access control so a user cannot reach step N until step N−1 is marked complete. Individual steps extend `TunnelStep` and optionally mix in `FormTunnelStepTrait` to handle form submission within a step. It is aimed at Symfony developers implementing wizard-style processes such as checkout flows, onboarding sequences, or any user journey that must advance in strict order.
 
@@ -127,7 +127,7 @@ Visit the [Wexample Suite documentation](https://docs.wexample.com) for the comp
 ## Dependencies
 
 - php: >=8.5
-- wexample/symfony-helpers: >=8.0.0
+- wexample/symfony-helpers: >=9.0.0
 
 ## Versioning & Compatibility Policy
 
