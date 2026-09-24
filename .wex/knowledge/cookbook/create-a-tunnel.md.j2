@@ -66,7 +66,7 @@ class ConfirmStep extends AbstractFormTunnelStep
 }
 ```
 
-The template receives `form` and renders it with `form_load(render_pass, form, '<form template>')`. A valid submission moves to the next step, inside the modal when the tunnel was opened in one.
+The template receives `form` and renders it with `form_load(render_pass, form, '<form template>')`. The form type adds no submit button: `tunnel-buttons.html.twig` renders the next button of a form step as its submit, pointing at the form tag from outside through the HTML `form` attribute, so the way on stays in the same place on every step. A valid submission moves to the next step, inside the modal when the tunnel was opened in one.
 
 ## Waiting for an outside event
 

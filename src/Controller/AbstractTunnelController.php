@@ -171,11 +171,18 @@ abstract class AbstractTunnelController extends AbstractPagesController
         return $this->renderFormStep($cursor, $form);
     }
 
+    /**
+     * The form tag gets an id, for the submit button of the tunnel buttons to
+     * point at it from outside: the way on stays where it is on every step.
+     */
     private function renderFormStep(
         TunnelCursor $cursor,
         FormInterface $form,
     ): Response {
-        return $this->renderTunnelStep($cursor, ['form' => $form->createView()]);
+        $view = $form->createView();
+        $view->vars['attr']['id'] ??= $view->vars['id'];
+
+        return $this->renderTunnelStep($cursor, ['form' => $view]);
     }
 
     private function setFormSuccessAction(

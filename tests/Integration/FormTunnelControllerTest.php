@@ -31,6 +31,8 @@ class FormTunnelControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertSame(1, $crawler->filter('input[name="tunnel_test_form[name]"]')->count());
+        // The tag has an id, for a submit button outside of it to point at.
+        $this->assertSame(1, $crawler->filter('form#tunnel_test_form')->count());
     }
 
     public function testAnInvalidSubmissionStaysOnTheStep(): void
