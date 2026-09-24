@@ -312,36 +312,48 @@ abstract class AbstractTunnelManagerService
         array $candidates,
         ?array $options = null,
     ): ?TunnelCursor {
-        $filtered = array_filter(
+        $matching = array_filter(
             $candidates,
             fn (TunnelCursor $cursor): bool => $this->isCurrentCursorCandidate($cursor, $options)
         );
 
-        if (!$filtered) {
+        if (!$matching) {
             return null;
         }
 
-        if (count($filtered) === 1) {
-            return current($filtered);
-        }
+        // The path already walked only breaks ties: a visitor whose browser
+        // went back without asking the server still stands elsewhere for it,
+        // and the variant their URL names has to be reachable all the same.
+        $onWalkedPath = array_filter(
+            $matching,
+            fn (TunnelCursor $cursor): bool => $this->isOnWalkedPath($cursor)
+        );
 
-        return $this->selectClosestCursorFromRoot($filtered);
+        return $this->selectClosestCursorFromRoot($onWalkedPath ?: $matching);
     }
 
+    /**
+     * Whether the cursor may be the one a request is about, from what the step
+     * says and the options the request carries.
+     */
     public function isCurrentCursorCandidate(
         TunnelCursor $cursor,
         ?array $options = null,
     ): bool {
+        if (!$cursor->step->isCurrentCursorCandidate($cursor, $this->requireSession(), $options)) {
+            return false;
+        }
+
+        return $options === null || $cursor->stepMatch($cursor->step, $options);
+    }
+
+    /**
+     * Whether the cursor continues the path the session last stood on, and is
+     * the branch that path had recorded when it recorded one.
+     */
+    public function isOnWalkedPath(TunnelCursor $cursor): bool
+    {
         $session = $this->requireSession();
-
-        if (!$cursor->step->isCurrentCursorCandidate($cursor, $session, $options)) {
-            return false;
-        }
-
-        if ($options !== null && !$cursor->stepMatch($cursor->step, $options)) {
-            return false;
-        }
-
         $lastAccessedCursor = $session->getLastAccessedCursorHash()
             ? $this->getCursor($session->getLastAccessedCursorHash())
             : null;
@@ -350,7 +362,6 @@ abstract class AbstractTunnelManagerService
             return true;
         }
 
-        // The path already walked said which variant of this step it leads to.
         if ($lastAccessedCursor->findFirstNextByStep($cursor->step)) {
             $redirectsToHash = $this->getVariableValue(
                 TunnelCursor::VARIABLE_NAME_REDIRECTS_TO,

@@ -65,6 +65,19 @@ class TestTunnelControllerTest extends WebTestCase
         $this->assertStringContainsString('[[OPTION:step-three-test-type=queryString]]', $content);
     }
 
+    public function testAVariantNamedByTheUrlIsReachedFromAnotherBranch(): void
+    {
+        $this->assertStep('step-one');
+        $this->assertStep('step-two');
+        $this->assertStep('step-three-bis', ['cursor-options' => ['step-three-test-type' => 'queryString']]);
+
+        // The browser went back to step two from its cache: the server still
+        // stands on the query string variant when the default one is asked for.
+        $content = $this->assertStep('step-three-bis', ['cursor-options' => ['step-three-test-type' => 'default']]);
+
+        $this->assertStringContainsString('[[OPTION:step-three-test-type=default]]', $content);
+    }
+
     public function testAStepCanRedirectWithinTheTunnel(): void
     {
         $this->assertStep('step-one');
