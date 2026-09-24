@@ -16,6 +16,10 @@ services:
     resource: '../../Tunnel/'
     exclude: '../../Tunnel/{Cycle,InMemoryTunnelSessionStorage.php}'
 
+  Wexample\SymfonyTunnels\Tests\Fixtures\App\Controller\:
+    resource: '../Controller/'
+    tags: ['controller.service_arguments']
+
   # symfony-testing registers it with the string '@kernel' instead of a
   # reference, which only YAML turns into the kernel service.
   Wexample\SymfonyHelpers\Service\BundleService:

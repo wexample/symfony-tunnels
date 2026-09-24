@@ -5,9 +5,16 @@ services:
         public: false
 
     Wexample\SymfonyTunnels\:
-        resource: '../../{Command,Repository,Service}'
+        resource: '../../{Command,Repository,Service,Twig}'
         exclude: '../../Service/**/Abstract*.php'
         tags: ['controller.service_arguments']
 
     Wexample\SymfonyTunnels\Interface\TunnelSessionStorageInterface:
         alias: Wexample\SymfonyTunnels\Service\TunnelSessionService
+
+    Wexample\SymfonyTunnels\Routing\TunnelRouteLoader:
+        arguments:
+            $controllerClasses: '%wexample_symfony_tunnels.controllers%'
+            $container: '@service_container'
+        tags:
+            - { name: 'routing.loader' }

@@ -2,7 +2,10 @@
 
 namespace Wexample\SymfonyTunnels\Tests\Fixtures\App;
 
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+use Wexample\SymfonyLoader\WexampleSymfonyLoaderBundle;
 use Wexample\SymfonyTesting\Tests\Fixtures\AbstractFixtureKernel;
+use Wexample\SymfonyTranslations\WexampleSymfonyTranslationsBundle;
 use Wexample\SymfonyTunnels\WexampleSymfonyTunnelsBundle;
 
 class AppKernel extends AbstractFixtureKernel
@@ -15,6 +18,8 @@ class AppKernel extends AbstractFixtureKernel
     protected function getExtraBundles(): iterable
     {
         return [
+            new WexampleSymfonyLoaderBundle(),
+            new WexampleSymfonyTranslationsBundle(),
             new WexampleSymfonyTunnelsBundle(),
         ];
     }
@@ -24,5 +29,10 @@ class AppKernel extends AbstractFixtureKernel
         return [
             __DIR__ . '/config/config.yaml',
         ];
+    }
+
+    protected function configureRoutes(RoutingConfigurator $routes): void
+    {
+        $routes->import('@WexampleSymfonyTunnelsBundle/Resources/config/routes.yaml');
     }
 }

@@ -1,0 +1,3 @@
+tunnel_routes:
+    resource: .
+    type: tunnel_routes

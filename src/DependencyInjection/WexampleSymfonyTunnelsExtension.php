@@ -4,6 +4,7 @@ namespace Wexample\SymfonyTunnels\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Wexample\SymfonyHelpers\DependencyInjection\AbstractWexampleSymfonyExtension;
+use Wexample\SymfonyTunnels\Controller\AbstractTunnelController;
 use Wexample\SymfonyTunnels\Service\AbstractTunnelManagerService;
 use Wexample\SymfonyTunnels\Service\TunnelRegistry;
 
@@ -23,5 +24,9 @@ class WexampleSymfonyTunnelsExtension extends AbstractWexampleSymfonyExtension
         $container
             ->registerForAutoconfiguration(AbstractTunnelManagerService::class)
             ->addTag(TunnelRegistry::TAG_TUNNEL);
+
+        $container
+            ->registerForAutoconfiguration(AbstractTunnelController::class)
+            ->addTag(AbstractTunnelController::TAG_CONTROLLER);
     }
 }
