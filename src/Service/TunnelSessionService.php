@@ -2,8 +2,6 @@
 
 namespace Wexample\SymfonyTunnels\Service;
 
-use DateTime;
-use DateTimeInterface;
 use Wexample\SymfonyTunnels\Class\TunnelCursor;
 use Wexample\SymfonyTunnels\Entity\TunnelSession;
 use Wexample\SymfonyTunnels\Interface\TunnelSessionStorageInterface;
@@ -17,11 +15,6 @@ use Wexample\SymfonyTunnels\Repository\TunnelSessionVariableRepository;
 class TunnelSessionService implements TunnelSessionStorageInterface
 {
     /**
-     * How long an opened session survives without being walked.
-     */
-    public const string SESSION_EXPIRATION = '1 day';
-
-    /**
      * The key the resume hash travels under, in the query string.
      */
     public const string QUERY_STRING_SESSION_HASH = 'tunnel';
@@ -30,11 +23,6 @@ class TunnelSessionService implements TunnelSessionStorageInterface
         private readonly TunnelSessionRepository $tunnelSessionRepository,
         private readonly TunnelSessionVariableRepository $tunnelSessionVariableRepository,
     ) {
-    }
-
-    public static function buildExpirationDate(): DateTimeInterface
-    {
-        return (new DateTime())->modify('-' . self::SESSION_EXPIRATION);
     }
 
     /**
@@ -99,11 +87,7 @@ class TunnelSessionService implements TunnelSessionStorageInterface
      */
     public function purgeExpiredSessions(AbstractTunnelManagerService $manager): int
     {
-        $expired = $this->tunnelSessionRepository->findExpired(self::buildExpirationDate());
-        $expired = array_filter(
-            $expired,
-            static fn (TunnelSession $session): bool => $session->getTunnel() === $manager::getName()
-        );
+        $expired = $this->tunnelSessionRepository->findExpired($manager::getName());
 
         foreach ($expired as $session) {
             foreach ($manager->getSteps() as $step) {
@@ -226,8 +210,6 @@ class TunnelSessionService implements TunnelSessionStorageInterface
         ?string $browserSessionId,
         ?string $userIdentifier,
     ): ?TunnelSession {
-        $expirationDate = self::buildExpirationDate();
-
         if ($resumeHash) {
             $session = $this->tunnelSessionRepository->findOneByHashForTunnel(
                 $resumeHash,
@@ -235,7 +217,7 @@ class TunnelSessionService implements TunnelSessionStorageInterface
                 $userIdentifier
             );
 
-            if ($session && ! $session->isExpired($expirationDate)) {
+            if ($session && ! $session->isExpired()) {
                 return $session;
             }
         }
@@ -246,7 +228,7 @@ class TunnelSessionService implements TunnelSessionStorageInterface
             if ($session
                 && $session->getTunnel() === $tunnelName
                 && $session->getUserIdentifier() === $userIdentifier
-                && ! $session->isExpired($expirationDate)
+                && ! $session->isExpired()
             ) {
                 return $session;
             }

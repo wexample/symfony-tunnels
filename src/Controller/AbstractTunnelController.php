@@ -72,7 +72,6 @@ abstract class AbstractTunnelController extends AbstractPagesController
         $tunnel = $this->tunnelRegistry->getTunnel(static::getTunnelManagerClass());
 
         $tunnel->createEntrypoint();
-        $this->tunnelSessionService->purgeExpiredSessions($tunnel);
 
         try {
             $tunnel->setInitialVariables($initVariables);

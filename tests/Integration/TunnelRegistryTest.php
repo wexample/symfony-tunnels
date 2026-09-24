@@ -2,9 +2,11 @@
 
 namespace Wexample\SymfonyTunnels\Tests\Integration;
 
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
+use Wexample\SymfonyTunnels\Repository\TunnelSessionRepository;
 use Wexample\SymfonyTunnels\Service\TunnelRegistry;
 use Wexample\SymfonyTunnels\Service\TunnelSessionService;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\TestTunnelManagerService;
@@ -79,5 +81,39 @@ class TunnelRegistryTest extends KernelTestCase
         $this->assertMatchesRegularExpression('/global\s*\|\s*where\s*\|\s*"everywhere"/', $display);
 
         $this->assertSame(1, $tester->execute(['name' => 'test', '--session' => 'unknown']));
+    }
+
+    public function testThePurgeCommandDropsTheExpiredSessions(): void
+    {
+        $kernel = self::bootKernel();
+        $this->createDatabaseSchema();
+
+        $sessionService = self::getContainer()->get(TunnelSessionService::class);
+        $repository = self::getContainer()->get(TunnelSessionRepository::class);
+
+        $expired = $sessionService->findOrCreateSession('test');
+        $expired->setDateExpiration(new DateTime('-1 minute'));
+        $repository->save($expired);
+        $expiredId = $expired->getId();
+
+        $kept = $sessionService->findOrCreateSession('test');
+
+        $tester = new CommandTester((new Application($kernel))->find('tunnels:purge'));
+
+        $this->assertSame(0, $tester->execute([]));
+        $this->assertStringContainsString('1 expired session(s) dropped.', $tester->getDisplay());
+        $this->assertNull($repository->find($expiredId));
+        $this->assertNotNull($repository->find($kept->getId()));
+    }
+
+    public function testThePurgeIsScheduled(): void
+    {
+        $kernel = self::bootKernel();
+
+        $tester = new CommandTester((new Application($kernel))->find('debug:scheduler'));
+        $tester->execute([]);
+
+        $this->assertStringContainsString(TunnelRegistry::PURGE_FREQUENCY, $tester->getDisplay());
+        $this->assertStringContainsString('purgeExpiredSessions', $tester->getDisplay());
     }
 }

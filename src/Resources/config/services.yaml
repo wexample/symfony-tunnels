@@ -18,3 +18,13 @@ services:
             $container: '@service_container'
         tags:
             - { name: 'routing.loader' }
+
+    # A tag rather than #[AsPeriodicTask]: an application linking this package
+    # before installing symfony/scheduler would not compile with the attribute,
+    # while a tag nobody reads is left alone.
+    Wexample\SymfonyTunnels\Service\TunnelRegistry:
+        tags:
+            - name: 'scheduler.task'
+              trigger: 'every'
+              frequency: !php/const Wexample\SymfonyTunnels\Service\TunnelRegistry::PURGE_FREQUENCY
+              method: 'purgeExpiredSessions'

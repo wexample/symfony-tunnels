@@ -136,10 +136,21 @@ abstract class AbstractTunnelManagerService
         }
     }
 
+    /**
+     * How long a session of this tunnel lives without being walked. A step can
+     * ask for another duration while the visitor stands on it.
+     */
+    public function getSessionExpiration(): string
+    {
+        return TunnelSession::DEFAULT_EXPIRATION;
+    }
+
     public function updateLastAccessedCursor(TunnelCursor $cursor): void
     {
         $session = $this->requireSession();
-        $session->setLastAccessedCursorHash($cursor->hash);
+        $session
+            ->setLastAccessedCursorHash($cursor->hash)
+            ->expireIn($cursor->step->getSessionExpiration($cursor));
 
         $this->sessionStorage->saveSession($session);
     }

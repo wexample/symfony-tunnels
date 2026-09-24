@@ -13,6 +13,12 @@ class TunnelRegistry
     public const string TAG_TUNNEL = 'wexample.symfony_tunnels.tunnel';
 
     /**
+     * The shortest expiration a step should ask for: a session is dropped at
+     * most this long after it expired.
+     */
+    public const string PURGE_FREQUENCY = '15 minutes';
+
+    /**
      * @var array<string, AbstractTunnelManagerService>
      */
     private array $tunnels = [];
@@ -53,6 +59,9 @@ class TunnelRegistry
     /**
      * Drop the expired sessions of every tunnel, each one letting its own steps
      * clean up after them.
+     *
+     * Run by the scheduler of the application, out of any visitor's request:
+     * the task is declared in services.yaml.
      *
      * @return int the number of sessions dropped
      */

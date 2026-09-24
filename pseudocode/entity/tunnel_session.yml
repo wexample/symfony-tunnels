@@ -2,12 +2,12 @@ items:
   - name: TunnelSession
     type: class
     properties:
-      - name: id
-        type: Symfony\Component\Uid\Uuid
       - name: dateCreated
         type: DateTimeInterface
         nullable: true
         default: null
+      - name: id
+        type: Symfony\Component\Uid\Uuid
       - name: tunnel
         type: string
         nullable: true
@@ -21,6 +21,8 @@ items:
         type: string
         nullable: true
         default: null
+      - name: dateExpiration
+        type: DateTimeInterface
       - name: userIdentifier
         type: string
         nullable: true
@@ -37,6 +39,21 @@ items:
         type: Collection
         description: TunnelSessionVariable>
     methods:
+      - type: method
+        name: getDateCreated
+        return:
+          type: DateTimeInterface
+      - type: method
+        name: setDateCreatedNow
+        return:
+          type: self
+      - type: method
+        name: setDateCreated
+        parameters:
+          - type: DateTimeInterface
+            name: dateCreated
+        return:
+          type: self
       - type: method
         name: buildEntityPath
         parameters:
@@ -71,21 +88,6 @@ items:
         name: getCamelName
         return:
           type: string
-      - type: method
-        name: getDateCreated
-        return:
-          type: DateTimeInterface
-      - type: method
-        name: setDateCreatedNow
-        return:
-          type: self
-      - type: method
-        name: setDateCreated
-        parameters:
-          - type: DateTimeInterface
-            name: dateCreated
-        return:
-          type: self
       - type: method
         name: __construct
         description: ''
@@ -194,10 +196,32 @@ items:
         return:
           type: self
       - type: method
-        name: isExpired
-        description: "A session is expired once it has been opened for too long. Completed and\npending sessions are kept: something else decides when they are done."
+        name: getDateExpiration
+        return:
+          type: DateTimeInterface
+      - type: method
+        name: setDateExpiration
         parameters:
           - type: DateTimeInterface
-            name: expirationDate
+            name: dateExpiration
+        return:
+          type: self
+      - type: method
+        name: expireIn
+        description: ''
+        parameters:
+          - type: string
+            name: duration
+            description: 'a relative format, as `15 minutes` or `1 day`'
+        return:
+          type: self
+      - type: method
+        name: isExpired
+        description: "An opened session past its expiration date is dropped. Completed and\npending sessions are kept: something else decides when they are done."
+        parameters:
+          - type: DateTimeInterface
+            name: now
+            optional: true
+            default: null
         return:
           type: bool

@@ -26,7 +26,9 @@ The manager is the one stateful object of a request: it holds the cursors, the c
 
 The engine reaches that storage through {{ path("src/Interface/TunnelSessionStorageInterface.php") }}, implemented by {{ path("src/Service/TunnelSessionService.php") }}. The indirection is what lets the unit tests run the engine on an in-memory storage.
 
-`TunnelSessionService::findOrCreateSession()` looks for the session a request belongs to: the one its `?tunnel=` hash names, then the one the browser session remembers, then a new one. A found session is reused only for the same tunnel and the same user identifier, and only while it is not expired — opened sessions expire after one day, completed and pending ones never do. `initCursorSession()` starts over when the step asks for it (`tunnelSessionRecreate()`, true for a completed session by default), and `purgeExpiredSessions()` drops expired sessions after letting every step clean up in `onSessionDestroy()`.
+`TunnelSessionService::findOrCreateSession()` looks for the session a request belongs to: the one its `?tunnel=` hash names, then the one the browser session remembers, then a new one. A found session is reused only for the same tunnel and the same user identifier, and only while it is not expired. A session carries its own `dateExpiration`: born a day ahead (`TunnelSession::DEFAULT_EXPIRATION`), it is pushed back every time a step is displayed, by what that step asks in `getSessionExpiration()` — the tunnel's `getSessionExpiration()` by default, minutes for a step holding a stock. Only opened sessions expire, completed and pending ones never do. `initCursorSession()` starts over when the step asks for it (`tunnelSessionRecreate()`, true for a completed session by default).
+
+`purgeExpiredSessions()` drops expired sessions after letting every step clean up in `onSessionDestroy()`. It never runs in a visitor's request: `TunnelRegistry::purgeExpiredSessions()` is a `scheduler.task` every `TunnelRegistry::PURGE_FREQUENCY` (15 minutes), declared in `services.yaml` rather than by `#[AsPeriodicTask]` so that an application linking the package before installing `symfony/scheduler` still compiles. It needs the application to consume the `scheduler_default` transport (`messenger:consume scheduler_default`); `tunnels:purge` runs it by hand.
 
 The values a tunnel is opened with are declared in `getInitVariablesConfig()` (`type`, `required`, `default`, `autoInit`), checked by `setInitialVariables()`, and stored as initial variables — entities as their identifier. `autoInitVariables()` rebuilds them from a session without a request.
 
@@ -40,7 +42,7 @@ The values a tunnel is opened with are declared in `getInitVariablesConfig()` (`
 
 {{ path("src/Controller/AbstractTunnelController.php") }} extends `symfony-loader`'s `AbstractPagesController`. `handleTunnelRequest()`:
 
-1. Finds the manager in the registry, builds the tree, purges expired sessions and applies the opening values — a mismatch is a 404.
+1. Finds the manager in the registry, builds the tree and applies the opening values — a mismatch is a 404.
 2. Finds or creates the session and hands it to the manager.
 3. Guesses the cursor: every cursor whose route params the request carries is a candidate, and `AbstractTunnelManagerService::selectCurrentCursor()` narrows them down with the step's own veto, the query options, the path from the last cursor displayed and the branch it had recorded (`redirects-to`), then keeps the one closest to the root.
 4. Without a cursor, redirects to the entrypoint when no step was named, and answers 404 when one was.

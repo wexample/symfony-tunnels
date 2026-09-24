@@ -2,6 +2,7 @@
 
 namespace Wexample\SymfonyTunnels\Entity;
 
+use DateTime;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -11,11 +12,13 @@ use Random\RandomException;
 use Wexample\Pseudocode\Attribute\PseudocodeExport;
 use Wexample\SymfonyHelpers\Entity\AbstractEntity;
 use Wexample\SymfonyHelpers\Entity\Traits\HasDateCreatedTrait;
+use Wexample\SymfonyHelpers\Helper\VariableHelper;
 use Wexample\SymfonyTunnels\Enum\TunnelSessionStatus;
 use Wexample\SymfonyTunnels\Repository\TunnelSessionRepository;
 
 #[ORM\Entity(repositoryClass: TunnelSessionRepository::class)]
 #[ORM\Table(name: 'tunnel_session')]
+#[ORM\Index(fields: ['status', 'dateExpiration'])]
 #[PseudocodeExport(inherited: true)]
 class TunnelSession extends AbstractEntity
 {
@@ -25,6 +28,12 @@ class TunnelSession extends AbstractEntity
      * Length of the hexadecimal resume hash, 16 random bytes.
      */
     public const int HASH_LENGTH = 32;
+
+    /**
+     * How long a session lives without being walked, unless its tunnel or the
+     * step it stopped on says otherwise.
+     */
+    public const string DEFAULT_EXPIRATION = '1 day';
 
     #[ORM\Column(length: 60)]
     private ?string $tunnel = null;
@@ -37,6 +46,12 @@ class TunnelSession extends AbstractEntity
 
     #[ORM\Column(length: 32, nullable: true)]
     private ?string $lastAccessedCursorHash = null;
+
+    /**
+     * Pushed back every time a step is displayed, by what that step allows.
+     */
+    #[ORM\Column(type: VariableHelper::VARIABLE_TYPE_DATETIME)]
+    private DateTimeInterface $dateExpiration;
 
     /**
      * The security identifier of the visitor, when there is one. The package
@@ -67,6 +82,7 @@ class TunnelSession extends AbstractEntity
 
         $this->tunnelSessionVariables = new ArrayCollection();
         $this->hash = bin2hex(random_bytes(self::HASH_LENGTH / 2));
+        $this->expireIn(self::DEFAULT_EXPIRATION);
     }
 
     public function getTunnel(): ?string
@@ -183,13 +199,33 @@ class TunnelSession extends AbstractEntity
         return $this;
     }
 
+    public function getDateExpiration(): DateTimeInterface
+    {
+        return $this->dateExpiration;
+    }
+
+    public function setDateExpiration(DateTimeInterface $dateExpiration): self
+    {
+        $this->dateExpiration = $dateExpiration;
+
+        return $this;
+    }
+
     /**
-     * A session is expired once it has been opened for too long. Completed and
+     * @param string $duration a relative format, as `15 minutes` or `1 day`
+     */
+    public function expireIn(string $duration): self
+    {
+        return $this->setDateExpiration(new DateTime('+' . $duration));
+    }
+
+    /**
+     * An opened session past its expiration date is dropped. Completed and
      * pending sessions are kept: something else decides when they are done.
      */
-    public function isExpired(DateTimeInterface $expirationDate): bool
+    public function isExpired(?DateTimeInterface $now = null): bool
     {
         return $this->hasStatus(TunnelSessionStatus::OPENED)
-            && $this->getDateCreated() < $expirationDate;
+            && $this->dateExpiration < ($now ?? new DateTime());
     }
 }

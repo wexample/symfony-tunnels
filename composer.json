@@ -29,7 +29,9 @@
     "wexample/php-pseudocode": ">=1.0.0",
     "wexample/symfony-pseudocode": ">=3.0.0",
     "wexample/symfony-seo": ">=1.0.0",
-    "symfony/form": "^7.4"
+    "symfony/form": "^7.4",
+    "symfony/scheduler": "^7.4 || ^8.0",
+    "symfony/messenger": "^7.4 || ^8.0"
   },
   "require-dev": {
     "phpunit/phpunit": "*",

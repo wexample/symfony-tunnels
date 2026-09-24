@@ -2,6 +2,7 @@
 
 namespace Wexample\SymfonyTunnels\Repository;
 
+use DateTime;
 use DateTimeInterface;
 use Wexample\SymfonyHelpers\Repository\AbstractRepository;
 use Wexample\SymfonyTunnels\Entity\Traits\Manipulator\TunnelSessionEntityManipulatorTrait;
@@ -54,15 +55,19 @@ class TunnelSessionRepository extends AbstractRepository
     }
 
     /**
-     * @return TunnelSession[]
+     * @return TunnelSession[] the opened sessions of this tunnel past their expiration date
      */
-    public function findExpired(DateTimeInterface $expirationDate): array
-    {
+    public function findExpired(
+        string $tunnel,
+        DateTimeInterface $now = new DateTime(),
+    ): array {
         return $this->createQueryBuilder('session')
-            ->where('session.status = :status')
-            ->andWhere('session.dateCreated < :expirationDate')
+            ->where('session.tunnel = :tunnel')
+            ->andWhere('session.status = :status')
+            ->andWhere('session.dateExpiration < :now')
+            ->setParameter('tunnel', $tunnel)
             ->setParameter('status', TunnelSessionStatus::OPENED)
-            ->setParameter('expirationDate', $expirationDate)
+            ->setParameter('now', $now)
             ->getQuery()
             ->getResult();
     }

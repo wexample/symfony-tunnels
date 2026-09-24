@@ -56,7 +56,7 @@ class TunnelSessionServiceTest extends KernelTestCase
     public function testAnExpiredSessionIsReplacedByANewOne(): void
     {
         $session = $this->sessionService->findOrCreateSession(self::TUNNEL_NAME);
-        $session->setDateCreated(new DateTime('-2 days'));
+        $session->setDateExpiration(new DateTime('-1 minute'));
         $this->sessionRepository->save($session);
 
         $this->assertNotSame(
@@ -65,6 +65,44 @@ class TunnelSessionServiceTest extends KernelTestCase
                 self::TUNNEL_NAME,
                 browserSessionId: (string) $session->getId()
             )->getId()
+        );
+    }
+
+    public function testASessionStillWalkedOutlivesItsCreationDate(): void
+    {
+        $session = $this->sessionService->findOrCreateSession(self::TUNNEL_NAME);
+        $session->setDateCreated(new DateTime('-2 days'));
+        $this->sessionRepository->save($session);
+
+        $this->assertSame(
+            $session->getId(),
+            $this->sessionService->findOrCreateSession(
+                self::TUNNEL_NAME,
+                browserSessionId: (string) $session->getId()
+            )->getId()
+        );
+    }
+
+    public function testTheStepTheVisitorStoppedOnSetsTheExpiration(): void
+    {
+        $manager = $this->createManager();
+        $manager->setSession($this->sessionService->findOrCreateSession(self::TUNNEL_NAME));
+        $entrypoint = $manager->createEntrypoint();
+        $stepFive = $manager->findCursorsByStep(StepFive::class)[0];
+
+        $manager->updateLastAccessedCursor($stepFive);
+        $this->assertEqualsWithDelta(
+            (new DateTime('+' . StepFive::SESSION_EXPIRATION))->getTimestamp(),
+            $manager->getSession()->getDateExpiration()->getTimestamp(),
+            5
+        );
+
+        // Walking back to a step asking nothing gives the tunnel's own duration back.
+        $manager->updateLastAccessedCursor($entrypoint);
+        $this->assertEqualsWithDelta(
+            (new DateTime('+' . $manager->getSessionExpiration()))->getTimestamp(),
+            $manager->getSession()->getDateExpiration()->getTimestamp(),
+            5
         );
     }
 
@@ -144,7 +182,7 @@ class TunnelSessionServiceTest extends KernelTestCase
         $manager->createEntrypoint();
 
         $expired = $this->sessionService->findOrCreateSession(self::TUNNEL_NAME);
-        $expired->setDateCreated(new DateTime('-2 days'));
+        $expired->setDateExpiration(new DateTime('-1 minute'));
         $this->sessionRepository->save($expired);
 
         $kept = $this->sessionService->findOrCreateSession(self::TUNNEL_NAME);

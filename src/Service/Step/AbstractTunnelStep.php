@@ -118,6 +118,17 @@ abstract class AbstractTunnelStep
         return TunnelStepCompleteStrategy::ON_INIT;
     }
 
+    /**
+     * How long the session lives once the visitor stopped on this step: a step
+     * holding a stock for them asks for minutes, not a day.
+     *
+     * @return string a relative format, as `15 minutes` or `1 day`
+     */
+    public function getSessionExpiration(TunnelCursor $cursor): string
+    {
+        return $cursor->manager->getSessionExpiration();
+    }
+
     public function previousStepLoadingStrategy(): TunnelStepPreviousLoadingStrategy
     {
         return TunnelStepPreviousLoadingStrategy::RESET;

@@ -105,28 +105,41 @@ class TunnelSessionEntityTest extends KernelTestCase
 
     public function testOnlyOpenedSessionsExpire(): void
     {
-        $expirationDate = new DateTime('-1 day');
-
         $opened = $this->sessionRepository->saveNewTunnelSession(self::TUNNEL_NAME);
-        $opened->setDateCreated(new DateTime('-2 days'));
+        $opened->setDateExpiration(new DateTime('-1 minute'));
 
         $completed = $this->sessionRepository->saveNewTunnelSession(self::TUNNEL_NAME);
-        $completed->setDateCreated(new DateTime('-2 days'));
+        $completed->setDateExpiration(new DateTime('-1 minute'));
         $completed->setStatus(TunnelSessionStatus::COMPLETED);
 
         $recent = $this->sessionRepository->saveNewTunnelSession(self::TUNNEL_NAME);
 
+        $other = $this->sessionRepository->saveNewTunnelSession('some-other-tunnel');
+        $other->setDateExpiration(new DateTime('-1 minute'));
+
         $this->sessionRepository->save($opened);
         $this->sessionRepository->save($completed);
+        $this->sessionRepository->save($other);
 
-        $this->assertTrue($opened->isExpired($expirationDate));
-        $this->assertFalse($completed->isExpired($expirationDate));
-        $this->assertFalse($recent->isExpired($expirationDate));
+        $this->assertTrue($opened->isExpired());
+        $this->assertFalse($completed->isExpired());
+        $this->assertFalse($recent->isExpired());
 
-        $expired = $this->sessionRepository->findExpired($expirationDate);
+        $expired = $this->sessionRepository->findExpired(self::TUNNEL_NAME);
         $this->assertSame(
             [$opened->getId()],
             array_map(static fn (TunnelSession $session): mixed => $session->getId(), $expired)
+        );
+    }
+
+    public function testASessionIsBornWithTheDefaultExpiration(): void
+    {
+        $session = $this->sessionRepository->saveNewTunnelSession(self::TUNNEL_NAME);
+
+        $this->assertEqualsWithDelta(
+            (new DateTime('+' . TunnelSession::DEFAULT_EXPIRATION))->getTimestamp(),
+            $session->getDateExpiration()->getTimestamp(),
+            5
         );
     }
 }
