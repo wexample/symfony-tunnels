@@ -1,11 +1,19 @@
-{#- Previous and next, each shown only when the visitor may go there. -#}
+{#- Previous and next, each shown only when the visitor may go there: previous
+    at the start of the row, next at its end and as the action the page leads
+    to. Nothing at all when neither is open, so no empty bar is left behind. -#}
 {%- set previousUrl = tunnel_previous_url(tunnelCursor) -%}
 {%- set nextUrl = tunnel_next_url(tunnelCursor) -%}
-<div class="tunnel-buttons">
-    {%- if previousUrl -%}
-        {{ button_link('ph:bold/arrow-left', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.previous'|trans, previousUrl) }}
-    {%- endif -%}
-    {%- if nextUrl -%}
-        {{ button_link('ph:bold/arrow-right', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.next'|trans, nextUrl) }}
-    {%- endif -%}
-</div>
+{%- if previousUrl or nextUrl -%}
+    <div class="stack--split tunnel-buttons">
+        <div>
+            {%- if previousUrl -%}
+                {{ button_link('ph:bold/arrow-left', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.previous'|trans, previousUrl) }}
+            {%- endif -%}
+        </div>
+        <div>
+            {%- if nextUrl -%}
+                {{ button_link('ph:bold/arrow-right', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.next'|trans, nextUrl, { class: 'button--invert' }) }}
+            {%- endif -%}
+        </div>
+    </div>
+{%- endif -%}
