@@ -77,6 +77,13 @@ class TunnelExtension extends AbstractExtension
 
     public function tunnelNextUrl(TunnelCursor $cursor): ?string
     {
+        // Where the tree parts, no branch is "the next one": the step shows the
+        // branches itself, and a next button could only pick one of them behind
+        // the visitor's back.
+        if (count($cursor->next) > 1) {
+            return null;
+        }
+
         $next = $cursor->manager->selectNextCursor($cursor);
 
         if (! $next || ! $next->step->allowDirectAccess($next, $cursor)) {

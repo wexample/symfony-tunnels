@@ -53,4 +53,31 @@ class TunnelExtensionTest extends KernelTestCase
         $this->assertSame('/tunnel/test-tunnel/with/prefix/step-one', $stepper['steps'][0]['href']);
         $this->assertNull($stepper['steps'][3]['href']);
     }
+
+    public function testTheNextLinkLeadsToTheOnlyStepAhead(): void
+    {
+        $entrypoint = $this->tunnel->createEntrypoint();
+        $stepTwo = $entrypoint->findFirstNext();
+        $stepThree = $stepTwo->findFirstNextByStep(StepThree::class);
+
+        $entrypoint->setComplete();
+        $stepTwo->setComplete();
+        $stepThree->setComplete();
+
+        $this->assertSame(
+            '/tunnel/test-tunnel/with/prefix/step-four',
+            self::getContainer()->get(TunnelExtension::class)->tunnelNextUrl($stepThree)
+        );
+    }
+
+    public function testWhereBranchesPartThereIsNoNextLink(): void
+    {
+        $entrypoint = $this->tunnel->createEntrypoint();
+        $entrypoint->setComplete();
+
+        $this->assertCount(3, $entrypoint->next);
+        $this->assertNull(
+            self::getContainer()->get(TunnelExtension::class)->tunnelNextUrl($entrypoint)
+        );
+    }
 }
