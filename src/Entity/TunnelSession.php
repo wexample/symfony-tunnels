@@ -16,7 +16,6 @@ use Wexample\SymfonyTunnels\Repository\TunnelSessionRepository;
 
 #[ORM\Entity(repositoryClass: TunnelSessionRepository::class)]
 #[ORM\Table(name: 'tunnel_session')]
-#[ORM\Index(fields: ['hash'])]
 #[PseudocodeExport(inherited: true)]
 class TunnelSession extends AbstractEntity
 {

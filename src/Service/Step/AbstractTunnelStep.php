@@ -184,10 +184,13 @@ abstract class AbstractTunnelStep
             return false;
         }
 
-        // Moving forward requires having finished with where we stand.
-        return $cursor->isFirst()
-            || !$cursorFrom->hasNextRecursive($cursor)
-            || $cursorFrom->isComplete();
+        if (!$cursorFrom->hasNextRecursive($cursor)) {
+            return true;
+        }
+
+        // Moving forward requires every step up to the target to be done, or
+        // the link would only lead to a redirect back.
+        return $cursor->getFirstIncompletePreviousCursor() === null;
     }
 
     /**
@@ -296,6 +299,14 @@ abstract class AbstractTunnelStep
     public function getPathGroupIdentifier(TunnelCursor $cursor): string
     {
         return static::getName();
+    }
+
+    /**
+     * What the visitor reads for this step in the tunnel navigation.
+     */
+    public function buildLabel(TunnelCursor $cursor): string
+    {
+        return ucfirst(str_replace('-', ' ', static::getName()));
     }
 
     public function getViewFolder(TunnelCursor $cursor): string

@@ -1,0 +1,11 @@
+{#- Previous and next, each shown only when the visitor may go there. -#}
+{%- set previousUrl = tunnel_previous_url(tunnelCursor) -%}
+{%- set nextUrl = tunnel_next_url(tunnelCursor) -%}
+<div class="tunnel-buttons">
+    {%- if previousUrl -%}
+        {{ button_link('ph:bold/arrow-left', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.previous'|trans, previousUrl) }}
+    {%- endif -%}
+    {%- if nextUrl -%}
+        {{ button_link('ph:bold/arrow-right', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.next'|trans, nextUrl) }}
+    {%- endif -%}
+</div>

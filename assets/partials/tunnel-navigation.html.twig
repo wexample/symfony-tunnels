@@ -1,0 +1,4 @@
+{#- The steps of the tunnel around the one being displayed, and the way back
+    and forth. Expects `tunnelCursor`, as every step template gets it. -#}
+{%- set stepper = tunnel_stepper(tunnelCursor) -%}
+{{ component(render_pass, '@WexampleSymfonyDesignSystemBundle/components/stepper', {}, stepper) }}

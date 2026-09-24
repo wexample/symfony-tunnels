@@ -164,11 +164,25 @@ class TunnelNavigationTest extends TestCase
     {
         $stepThree = $this->stepTwo->findFirstNextByStep(StepThree::class);
 
+        $this->stepOne->setComplete();
         $this->assertFalse($stepThree->step->allowDirectAccess($stepThree, $this->stepTwo));
 
         $this->stepTwo->setComplete();
 
         $this->assertTrue($stepThree->step->allowDirectAccess($stepThree, $this->stepTwo));
+    }
+
+    public function testAStepTwoLevelsAheadIsReachableOnlyOnceTheOneBetweenIsDone(): void
+    {
+        $stepThree = $this->stepTwo->findFirstNextByStep(StepThree::class);
+        $stepFour = $stepThree->findFirstNext();
+
+        $this->stepOne->setComplete();
+        $this->stepTwo->setComplete();
+        $this->assertFalse($stepFour->step->allowDirectAccess($stepFour, $this->stepTwo));
+
+        $stepThree->setComplete();
+        $this->assertTrue($stepFour->step->allowDirectAccess($stepFour, $this->stepTwo));
     }
 
     public function testAStepReachableFromItselfIsRefused(): void
