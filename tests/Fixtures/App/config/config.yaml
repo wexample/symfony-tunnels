@@ -11,3 +11,12 @@ services:
     autowire: true
     autoconfigure: true
     public: true
+
+  Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\:
+    resource: '../../Tunnel/'
+    exclude: '../../Tunnel/{Cycle,InMemoryTunnelSessionStorage.php}'
+
+  # symfony-testing registers it with the string '@kernel' instead of a
+  # reference, which only YAML turns into the kernel service.
+  Wexample\SymfonyHelpers\Service\BundleService:
+    arguments: ['@kernel']

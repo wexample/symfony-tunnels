@@ -5,7 +5,8 @@ services:
         public: false
 
     Wexample\SymfonyTunnels\:
-        resource: '../../{Repository,Service}'
+        resource: '../../{Command,Repository,Service}'
+        exclude: '../../Service/**/Abstract*.php'
         tags: ['controller.service_arguments']
 
     Wexample\SymfonyTunnels\Interface\TunnelSessionStorageInterface:
