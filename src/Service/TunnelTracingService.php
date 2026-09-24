@@ -3,6 +3,7 @@
 namespace Wexample\SymfonyTunnels\Service;
 
 use Wexample\SymfonyTunnels\Class\TunnelCursor;
+use Wexample\SymfonyTunnels\Entity\TunnelSessionVariable;
 use Wexample\SymfonyTunnels\Helper\TunnelTreeHelper;
 
 /**
@@ -46,6 +47,48 @@ class TunnelTracingService
         }
 
         return implode(PHP_EOL, $lines);
+    }
+
+    /**
+     * What the session of the tunnel holds, one row per variable, the scope
+     * being the step of the cursor it belongs to or `global`.
+     *
+     * @return array<array{name: string, scope: string, cursorHash: ?string, value: string, initial: bool}>
+     */
+    public function buildVariableRows(AbstractTunnelManagerService $tunnel): array
+    {
+        $rows = [];
+
+        foreach ($tunnel->getSession()->getTunnelSessionVariables() as $variable) {
+            $rows[] = $this->buildVariableRow($tunnel, $variable);
+        }
+
+        usort(
+            $rows,
+            static fn (array $a, array $b): int => [$a['scope'], $a['name']] <=> [$b['scope'], $b['name']]
+        );
+
+        return $rows;
+    }
+
+    private function buildVariableRow(
+        AbstractTunnelManagerService $tunnel,
+        TunnelSessionVariable $variable,
+    ): array {
+        $cursor = $variable->isGlobal() ? null : $tunnel->getCursor($variable->getCursorHash());
+
+        return [
+            'name' => (string) $variable->getName(),
+            'scope' => match (true) {
+                $variable->isGlobal() => 'global',
+                $cursor !== null => $cursor->step::getName(),
+                // A cursor the current tree no longer has: the tunnel changed.
+                default => 'unknown cursor',
+            },
+            'cursorHash' => $variable->getCursorHash(),
+            'value' => json_encode($variable->getValue(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            'initial' => $variable->isInitial(),
+        ];
     }
 
     private function traceTreePart(
