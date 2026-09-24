@@ -1,6 +1,15 @@
 framework:
   test: true
   secret: "test"
+  session:
+    storage_factory_id: session.storage.factory.mock_file
+
+wexample_symfony_loader:
+  front_paths:
+    front: '%kernel.project_dir%/../front/'
+
+twig:
+  default_path: '%kernel.project_dir%/templates'
 
 doctrine:
   orm:

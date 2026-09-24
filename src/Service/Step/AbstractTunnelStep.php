@@ -303,9 +303,13 @@ abstract class AbstractTunnelStep
         return $cursor->manager::getName();
     }
 
+    /**
+     * The template of the step, relative to the front directory of whoever
+     * renders it and without extension: `tunnels/<tunnel>/<step>`.
+     */
     public function buildStepView(TunnelCursor $cursor): string
     {
-        return 'tunnels/' . $this->getViewFolder($cursor) . '/' . static::getName() . '.html.twig';
+        return 'tunnels/' . $this->getViewFolder($cursor) . '/' . static::getName();
     }
 
     /**

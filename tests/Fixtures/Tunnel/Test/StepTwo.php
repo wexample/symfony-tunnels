@@ -38,7 +38,7 @@ class StepTwo extends AbstractTestStep
 
     public function needsRedirect(TunnelCursor $cursor): null|RedirectResponse|TunnelCursor
     {
-        if ($this->requestStack->getCurrentRequest()?->get(self::QUERY_STRING_COMPLETE)) {
+        if ($this->requestStack->getCurrentRequest()?->query->get(self::QUERY_STRING_COMPLETE)) {
             $redirectsTo = $cursor->findFirstNextByOptions(self::STEP_THREE_BIS_SESSION_OPTIONS);
             $cursor->setComplete($redirectsTo);
 

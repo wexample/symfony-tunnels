@@ -31,7 +31,7 @@ class StepFour extends AbstractTestStep
 
     public function needsRedirect(TunnelCursor $cursor): null|RedirectResponse|TunnelCursor
     {
-        if ($this->requestStack->getCurrentRequest()?->get(self::QUERY_STRING_REDIRECTS)) {
+        if ($this->requestStack->getCurrentRequest()?->query->get(self::QUERY_STRING_REDIRECTS)) {
             return new RedirectResponse('/');
         }
 

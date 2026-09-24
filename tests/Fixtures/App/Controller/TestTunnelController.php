@@ -2,6 +2,7 @@
 
 namespace Wexample\SymfonyTunnels\Tests\Fixtures\App\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Wexample\SymfonyTunnels\Attribute\TunnelRoute;
 use Wexample\SymfonyTunnels\Controller\AbstractTunnelController;
@@ -15,8 +16,8 @@ class TestTunnelController extends AbstractTunnelController
     }
 
     #[TunnelRoute(pathPrefix: 'with/prefix')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        return new Response();
+        return $this->handleTunnelRequest($request, ['label' => 'test']);
     }
 }
