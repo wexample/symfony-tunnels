@@ -180,6 +180,14 @@ abstract class AbstractTunnelStep
         TunnelCursor $cursor,
         TunnelCursor $cursorFrom,
     ): bool {
+        // A step that would start the session over, a closed one by default,
+        // only leads back to the entrypoint of a new session.
+        $session = $cursor->manager->getSession();
+
+        if ($session && $cursor !== $cursorFrom && $cursor->step->tunnelSessionRecreate($session, $cursor)) {
+            return false;
+        }
+
         $allowed = true;
 
         $cursorFrom->forEachCursorBetween(

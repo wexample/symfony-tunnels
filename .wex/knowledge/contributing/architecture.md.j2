@@ -65,13 +65,13 @@ The values a tunnel is opened with are declared in `getInitVariablesConfig()` (`
 
 `AbstractTunnelStep::needsRedirect()` sends the visitor to the direct parent when it is incomplete, unless that parent completes on its child, then to the first incomplete ancestor under the default strategy of {{ path("src/Enum/TunnelStepRedirectStrategy.php") }}.
 
-`allowDirectAccess()` decides whether a link is offered: any cursor between the two ends can veto it through `allowAccessOf()`, and a link forward requires every ancestor of the target to be complete, so it never leads to a redirect back.
+`allowDirectAccess()` decides whether a link is offered: a target whose `tunnelSessionRecreate()` would start the session over — any step of a closed session, by default — is never linked, any cursor between the two ends can veto it through `allowAccessOf()`, and a link forward requires every ancestor of the target to be complete, so it never leads to a redirect back.
 
 ### Navigation and tooling
 
 {{ path("src/Helper/TunnelTreeHelper.php") }} reads a built tree: its root-to-leaf paths, its map of sections (one row per step and options, in an order every path agrees with), and the known steps around a cursor — the step groups every remaining path goes through, with a null where paths diverge. {{ path("src/Class/TunnelNavigationItem.php") }} and {{ path("src/Class/TunnelTreeSection.php") }} carry the results.
 
-{{ path("src/Twig/TunnelExtension.php") }} exposes `tunnel_cursor_url`, `tunnel_stepper` — the options of the design system stepper, a divergence becoming an `unknown` step — and `tunnel_previous_url` / `tunnel_next_url`. The partials {{ path("assets/partials/tunnel-navigation.html.twig") }} and {{ path("assets/partials/tunnel-buttons.html.twig") }} use them.
+{{ path("src/Twig/TunnelExtension.php") }} exposes `tunnel_cursor_url`, `tunnel_stepper` — the options of the design system stepper, a divergence becoming an `unknown` step, and a step every path goes through under several variants being labelled by `buildGroupLabel()` until one is picked — and `tunnel_previous_url` / `tunnel_next_url`. The partials {{ path("assets/partials/tunnel-navigation.html.twig") }} and {{ path("assets/partials/tunnel-buttons.html.twig") }} use them.
 
 {{ path("src/Service/TunnelTracingService.php") }} draws the tree and the map as text for {{ path("src/Command/InfoCommand.php") }}, `tunnels:info <name>`.
 

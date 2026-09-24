@@ -100,4 +100,22 @@ class TunnelExtensionTest extends KernelTestCase
         $this->assertSame('Plan', $step->buildGroupLabel([$free, $paid]));
         $this->assertSame('Free plan', $step->buildGroupLabel([$free]));
     }
+
+    public function testNothingIsLinkedBackIntoAClosedSession(): void
+    {
+        $stepTwo = $this->tunnel->createEntrypoint()->findFirstNext();
+        $stepThree = $stepTwo->findFirstNextByStep(StepThree::class);
+        $extension = self::getContainer()->get(TunnelExtension::class);
+
+        $this->assertSame('/tunnel/test-tunnel/with/prefix/step-two', $extension->tunnelPreviousUrl($stepThree));
+
+        $this->tunnel->setSessionComplete();
+
+        $this->assertNull($extension->tunnelPreviousUrl($stepThree));
+        // The step being displayed keeps its own link, which reloads it.
+        $this->assertSame(
+            [null, null, '/tunnel/test-tunnel/with/prefix/step-three', null],
+            array_column($extension->tunnelStepper($stepThree)['steps'], 'href')
+        );
+    }
 }
