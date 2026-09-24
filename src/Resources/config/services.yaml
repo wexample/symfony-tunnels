@@ -18,7 +18,3 @@ services:
             $container: '@service_container'
         tags:
             - { name: 'routing.loader' }
-
-    # The loader has no autoconfiguration on DevelopTabInterface yet.
-    Wexample\SymfonyTunnels\Service\TunnelDevelopTabService:
-        tags: ['wexample_symfony_loader.develop_tab']
