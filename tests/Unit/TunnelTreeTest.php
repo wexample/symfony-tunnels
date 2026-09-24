@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Wexample\SymfonyTunnels\Class\TunnelCursor;
 use Wexample\SymfonyTunnels\Entity\TunnelSession;
 use Wexample\SymfonyTunnels\Enum\TunnelCursorPosition;
-use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\InMemoryTunnelVariableStorage;
+use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\InMemoryTunnelSessionStorage;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\Test\StepFive;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\Test\StepFour;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\Test\StepOne;
@@ -198,7 +198,7 @@ class TunnelTreeTest extends TestCase
         $stepThreeBis = new StepThreeBis($stepFour, new StepFive());
 
         return new TestTunnelManagerService(
-            new InMemoryTunnelVariableStorage(),
+            new InMemoryTunnelSessionStorage(),
             new StepOne(
                 new StepTwo(
                     new StepThree($stepFour),

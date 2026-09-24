@@ -9,7 +9,7 @@ use Wexample\SymfonyTunnels\Entity\TunnelSession;
 use Wexample\SymfonyTunnels\Exception\TunnelCycleException;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\Cycle\CycleTunnelManagerService;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\Cycle\SelfReferencingStep;
-use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\InMemoryTunnelVariableStorage;
+use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\InMemoryTunnelSessionStorage;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\Test\StepFive;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\Test\StepFour;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\Test\StepOne;
@@ -32,7 +32,7 @@ class TunnelNavigationTest extends TestCase
         $stepFour = new StepFour($requestStack);
 
         $this->manager = new TestTunnelManagerService(
-            new InMemoryTunnelVariableStorage(),
+            new InMemoryTunnelSessionStorage(),
             new StepOne(
                 new StepTwo(
                     new StepThree($stepFour),
@@ -174,7 +174,7 @@ class TunnelNavigationTest extends TestCase
     public function testAStepReachableFromItselfIsRefused(): void
     {
         $manager = new CycleTunnelManagerService(
-            new InMemoryTunnelVariableStorage(),
+            new InMemoryTunnelSessionStorage(),
             new SelfReferencingStep()
         );
 

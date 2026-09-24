@@ -5,13 +5,16 @@ namespace Wexample\SymfonyTunnels\Interface;
 use Wexample\SymfonyTunnels\Entity\TunnelSession;
 
 /**
- * Where a tunnel keeps what the visitor produced while walking it.
+ * Where a tunnel keeps the session it is walking and what the visitor produced
+ * along the way.
  *
  * A null cursor hash addresses the scope global to the session, which never
  * overlaps a variable of the same name stored under a cursor.
  */
-interface TunnelVariableStorageInterface
+interface TunnelSessionStorageInterface
 {
+    public function saveSession(TunnelSession $session): void;
+
     public function getVariableValue(
         TunnelSession $session,
         string $name,

@@ -3,13 +3,13 @@
 namespace Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel;
 
 use Wexample\SymfonyTunnels\Entity\TunnelSession;
-use Wexample\SymfonyTunnels\Interface\TunnelVariableStorageInterface;
+use Wexample\SymfonyTunnels\Interface\TunnelSessionStorageInterface;
 
 /**
  * The engine's variable storage without a database, so that tree building,
  * completion strategies and branch resets can be tested on their own.
  */
-class InMemoryTunnelVariableStorage implements TunnelVariableStorageInterface
+class InMemoryTunnelSessionStorage implements TunnelSessionStorageInterface
 {
     /**
      * Values keyed by session, then by cursor hash, then by name.
@@ -17,6 +17,11 @@ class InMemoryTunnelVariableStorage implements TunnelVariableStorageInterface
      * @var array<int, array<string, array<string, mixed>>>
      */
     private array $values = [];
+
+    public function saveSession(TunnelSession $session): void
+    {
+        // Nothing to persist without a database.
+    }
 
     public function getVariableValue(
         TunnelSession $session,

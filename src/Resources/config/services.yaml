@@ -7,3 +7,6 @@ services:
     Wexample\SymfonyTunnels\:
         resource: '../../{Repository,Service}'
         tags: ['controller.service_arguments']
+
+    Wexample\SymfonyTunnels\Interface\TunnelSessionStorageInterface:
+        alias: Wexample\SymfonyTunnels\Service\TunnelSessionService
