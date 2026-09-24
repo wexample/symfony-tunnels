@@ -1,19 +1,28 @@
 {#- Previous and next, each shown only when the visitor may go there. On a form
     step, next is the submit of the form, pointing at it from outside: the form
-    itself carries no submit button, so the way on stays in one place. -#}
+    itself carries no submit button, so the way on stays in one place.
+
+    Two sibling groups and no wrapper, for the row holding them — a block footer
+    spaces its children apart — to put previous on the left and next on the
+    right. The previous group stays even empty, or a lone next would slide left;
+    with no button at all, nothing is written and the row can drop. -#}
 {%- set previousUrl = tunnel_previous_url(tunnelCursor) -%}
 {%- set nextUrl = form is defined ? null : tunnel_next_url(tunnelCursor) -%}
-<div class="tunnel-buttons">
-    {%- if previousUrl -%}
-        {{ button_link('ph:bold/arrow-left', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.previous'|trans, previousUrl) }}
-    {%- endif -%}
-    {%- if form is defined -%}
-        {{ button('ph:bold/arrow-right', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.next'|trans, {
-            type: 'submit',
-            form: form.vars.attr.id,
-            class: 'button--invert',
-        }) }}
-    {%- elseif nextUrl -%}
-        {{ button_link('ph:bold/arrow-right', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.next'|trans, nextUrl) }}
-    {%- endif -%}
-</div>
+{%- if previousUrl or nextUrl or form is defined -%}
+    <div class="tunnel-buttons--previous">
+        {%- if previousUrl -%}
+            {{ button_link('ph:bold/arrow-left', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.previous'|trans, previousUrl) }}
+        {%- endif -%}
+    </div>
+    <div class="tunnel-buttons--next">
+        {%- if form is defined -%}
+            {{ button('ph:bold/arrow-right', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.next'|trans, {
+                type: 'submit',
+                form: form.vars.attr.id,
+                class: 'button--invert',
+            }) }}
+        {%- elseif nextUrl -%}
+            {{ button_link('ph:bold/arrow-right', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.next'|trans, nextUrl) }}
+        {%- endif -%}
+    </div>
+{%- endif -%}
