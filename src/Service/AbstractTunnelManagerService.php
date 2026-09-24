@@ -225,7 +225,7 @@ abstract class AbstractTunnelManagerService
         $config = $this->getInitVariablesConfig();
 
         foreach ($variables as $name => $value) {
-            if (!isset($config[$name])) {
+            if (! isset($config[$name])) {
                 throw new TunnelInitVariableException(
                     'Unexpected value, expected one of: ' . implode(', ', array_keys($config)),
                     static::getName(),
@@ -235,7 +235,7 @@ abstract class AbstractTunnelManagerService
         }
 
         foreach ($config as $name => $variableConfig) {
-            if (!array_key_exists($name, $variables)) {
+            if (! array_key_exists($name, $variables)) {
                 if (array_key_exists('default', $variableConfig)) {
                     $variables[$name] = $variableConfig['default'];
                 } elseif ($variableConfig['required'] ?? false) {
@@ -317,7 +317,7 @@ abstract class AbstractTunnelManagerService
             fn (TunnelCursor $cursor): bool => $this->isCurrentCursorCandidate($cursor, $options)
         );
 
-        if (!$matching) {
+        if (! $matching) {
             return null;
         }
 
@@ -340,7 +340,7 @@ abstract class AbstractTunnelManagerService
         TunnelCursor $cursor,
         ?array $options = null,
     ): bool {
-        if (!$cursor->step->isCurrentCursorCandidate($cursor, $this->requireSession(), $options)) {
+        if (! $cursor->step->isCurrentCursorCandidate($cursor, $this->requireSession(), $options)) {
             return false;
         }
 
@@ -358,7 +358,7 @@ abstract class AbstractTunnelManagerService
             ? $this->getCursor($session->getLastAccessedCursorHash())
             : null;
 
-        if (!$lastAccessedCursor) {
+        if (! $lastAccessedCursor) {
             return true;
         }
 
@@ -384,7 +384,7 @@ abstract class AbstractTunnelManagerService
         $closestCursor = null;
 
         foreach ($cursors as $cursor) {
-            if (!$closestCursor || $cursor->distanceFromRoot() < $closestCursor->distanceFromRoot()) {
+            if (! $closestCursor || $cursor->distanceFromRoot() < $closestCursor->distanceFromRoot()) {
                 $closestCursor = $cursor;
             }
         }
@@ -468,7 +468,7 @@ abstract class AbstractTunnelManagerService
 
     protected function requireSession(): TunnelSession
     {
-        if (!$this->session) {
+        if (! $this->session) {
             throw new LogicException(
                 'The tunnel ' . static::getName() . ' is used outside of any session.'
             );

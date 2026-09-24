@@ -4,8 +4,8 @@ namespace Wexample\SymfonyTunnels\Repository;
 
 use DateTimeInterface;
 use Wexample\SymfonyHelpers\Repository\AbstractRepository;
-use Wexample\SymfonyTunnels\Entity\TunnelSession;
 use Wexample\SymfonyTunnels\Entity\Traits\Manipulator\TunnelSessionEntityManipulatorTrait;
+use Wexample\SymfonyTunnels\Entity\TunnelSession;
 use Wexample\SymfonyTunnels\Enum\TunnelSessionStatus;
 
 /**

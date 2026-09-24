@@ -50,7 +50,7 @@ class TunnelTreeHelper
             foreach ($path as $position => $cursor) {
                 $relativeHash = $pathHashes[$position];
 
-                if (!isset($sections[$relativeHash])) {
+                if (! isset($sections[$relativeHash])) {
                     $sections[$relativeHash] = new TunnelTreeSection($cursor);
 
                     // Right before the next row this path already has, which
@@ -59,6 +59,7 @@ class TunnelTreeHelper
                     foreach (array_slice($pathHashes, $position + 1) as $nextHash) {
                         if (isset($sections[$nextHash])) {
                             $insertAt = array_search($nextHash, $order, true);
+
                             break;
                         }
                     }
@@ -138,7 +139,7 @@ class TunnelTreeHelper
             $lastCursor = end($group['cursors']);
             $linkCursor = count($distinctCursors) === 1 ? $lastCursor : null;
 
-            if ($linkCursor && (!$currentCursor || !$linkCursor->step->allowDirectAccess($linkCursor, $currentCursor))) {
+            if ($linkCursor && (! $currentCursor || ! $linkCursor->step->allowDirectAccess($linkCursor, $currentCursor))) {
                 $linkCursor = null;
             }
 

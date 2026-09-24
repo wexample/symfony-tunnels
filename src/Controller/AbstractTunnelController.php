@@ -93,7 +93,7 @@ abstract class AbstractTunnelController extends AbstractPagesController
 
         $cursor = $this->guessCursorFromRequest($tunnel, $request);
 
-        if (!$cursor) {
+        if (! $cursor) {
             $this->rememberSession($tunnel, $request);
 
             return $this->redirectToEntrypoint($tunnel, $request);
@@ -147,7 +147,7 @@ abstract class AbstractTunnelController extends AbstractPagesController
         $processor = $step->getFormProcessor($cursor);
         $data = $step->buildFormData($cursor);
 
-        if (!$request->isMethod(Request::METHOD_POST)) {
+        if (! $request->isMethod(Request::METHOD_POST)) {
             return $this->renderFormStep($cursor, $processor->createForm($data));
         }
 
@@ -184,7 +184,7 @@ abstract class AbstractTunnelController extends AbstractPagesController
         ?TunnelCursor $next,
         Request $request,
     ): void {
-        if (!$next) {
+        if (! $next) {
             $processor->setSuccessAction(['type' => AbstractFormProcessor::ACTION_EMBED_STAY]);
 
             return;
@@ -239,7 +239,7 @@ abstract class AbstractTunnelController extends AbstractPagesController
      */
     protected function getTunnelUserIdentifier(): ?string
     {
-        if (!$this->container->has('security.token_storage')) {
+        if (! $this->container->has('security.token_storage')) {
             return null;
         }
 
@@ -250,7 +250,7 @@ abstract class AbstractTunnelController extends AbstractPagesController
     {
         $options = $request->query->all()[TunnelCursor::QUERY_STRING_CURSOR_OPTIONS] ?? null;
 
-        if (!is_array($options)) {
+        if (! is_array($options)) {
             return null;
         }
 

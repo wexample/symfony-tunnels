@@ -6,7 +6,6 @@ use DateTime;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Wexample\SymfonyTunnels\Class\TunnelCursor;
-use Wexample\SymfonyTunnels\Entity\TunnelSession;
 use Wexample\SymfonyTunnels\Enum\TunnelSessionStatus;
 use Wexample\SymfonyTunnels\Repository\TunnelSessionRepository;
 use Wexample\SymfonyTunnels\Service\TunnelSessionService;

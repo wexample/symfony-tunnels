@@ -79,7 +79,7 @@ class TunnelSessionService implements TunnelSessionStorageInterface
         TunnelSession $session,
         TunnelCursor $cursor,
     ): TunnelSession {
-        if (!$cursor->step->tunnelSessionRecreate($session, $cursor)) {
+        if (! $cursor->step->tunnelSessionRecreate($session, $cursor)) {
             return $session;
         }
 
@@ -176,7 +176,7 @@ class TunnelSessionService implements TunnelSessionStorageInterface
             $cursorHash
         );
 
-        if (!$variable) {
+        if (! $variable) {
             return false;
         }
 
@@ -235,7 +235,7 @@ class TunnelSessionService implements TunnelSessionStorageInterface
                 $userIdentifier
             );
 
-            if ($session && !$session->isExpired($expirationDate)) {
+            if ($session && ! $session->isExpired($expirationDate)) {
                 return $session;
             }
         }
@@ -246,7 +246,7 @@ class TunnelSessionService implements TunnelSessionStorageInterface
             if ($session
                 && $session->getTunnel() === $tunnelName
                 && $session->getUserIdentifier() === $userIdentifier
-                && !$session->isExpired($expirationDate)
+                && ! $session->isExpired($expirationDate)
             ) {
                 return $session;
             }

@@ -3,9 +3,9 @@
 namespace Wexample\SymfonyTunnels\Repository;
 
 use Wexample\SymfonyHelpers\Repository\AbstractRepository;
+use Wexample\SymfonyTunnels\Entity\Traits\Manipulator\TunnelSessionVariableEntityManipulatorTrait;
 use Wexample\SymfonyTunnels\Entity\TunnelSession;
 use Wexample\SymfonyTunnels\Entity\TunnelSessionVariable;
-use Wexample\SymfonyTunnels\Entity\Traits\Manipulator\TunnelSessionVariableEntityManipulatorTrait;
 
 /**
  * @method TunnelSessionVariable|null find($id, $lockMode = null, $lockVersion = null)

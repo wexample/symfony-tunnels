@@ -168,7 +168,7 @@ class TunnelSession extends AbstractEntity
 
     public function addTunnelSessionVariable(TunnelSessionVariable $tunnelSessionVariable): self
     {
-        if (!$this->tunnelSessionVariables->contains($tunnelSessionVariable)) {
+        if (! $this->tunnelSessionVariables->contains($tunnelSessionVariable)) {
             $this->tunnelSessionVariables->add($tunnelSessionVariable);
             $tunnelSessionVariable->setTunnelSession($this);
         }

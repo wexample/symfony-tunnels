@@ -80,7 +80,7 @@ class TunnelCursor
 
     public function isFirst(): bool
     {
-        return !$this->previous;
+        return ! $this->previous;
     }
 
     public function isLast(): bool
@@ -135,7 +135,7 @@ class TunnelCursor
 
     public function hasPreviousRecursive(TunnelCursor $relatedCursor): bool
     {
-        if (!$this->previous) {
+        if (! $this->previous) {
             return false;
         }
 
@@ -184,7 +184,7 @@ class TunnelCursor
                 $limitReached = true;
             }
 
-            if (!$limitReached) {
+            if (! $limitReached) {
                 $callback($cursor);
             }
         };
@@ -201,7 +201,7 @@ class TunnelCursor
      */
     public function getPreviousTrace(): array
     {
-        if (!$this->previous) {
+        if (! $this->previous) {
             return [];
         }
 
@@ -215,7 +215,7 @@ class TunnelCursor
         callable $callback,
         bool $lastFirst = false,
     ): void {
-        if (!$lastFirst) {
+        if (! $lastFirst) {
             $callback($this);
         }
 
@@ -237,7 +237,7 @@ class TunnelCursor
         callable $callback,
         bool $lastFirst = false,
     ): void {
-        if (!$lastFirst) {
+        if (! $lastFirst) {
             $callback($this);
         }
 
@@ -334,7 +334,7 @@ class TunnelCursor
     public function hasOptions(array $options): bool
     {
         foreach ($options as $name => $value) {
-            if (!array_key_exists($name, $this->options) || $this->options[$name] !== $value) {
+            if (! array_key_exists($name, $this->options) || $this->options[$name] !== $value) {
                 return false;
             }
         }
@@ -396,7 +396,7 @@ class TunnelCursor
 
     public function hasAllPreviousComplete(): bool
     {
-        if (!$this->previous) {
+        if (! $this->previous) {
             return true;
         }
 
@@ -418,7 +418,7 @@ class TunnelCursor
 
         $this->forEachPreviousRecursive(
             function (TunnelCursor $previous) use (&$found): void {
-                if (!$found && !$previous->isComplete()) {
+                if (! $found && ! $previous->isComplete()) {
                     $found = $previous;
                 }
             },

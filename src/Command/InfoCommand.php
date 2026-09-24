@@ -71,7 +71,7 @@ class InfoCommand extends AbstractBundleCommand
         $name = $input->getArgument('name');
         $tunnel = $this->tunnelRegistry->getTunnel($name);
 
-        if (!$tunnel) {
+        if (! $tunnel) {
             $output->writeln(
                 '<error>No tunnel named "' . $name . '". Known tunnels: '
                 . implode(', ', array_keys($this->tunnelRegistry->getTunnels())) . '</error>'
@@ -103,7 +103,7 @@ class InfoCommand extends AbstractBundleCommand
             'tunnel' => $tunnel::getName(),
         ]);
 
-        if (!$session) {
+        if (! $session) {
             $output->writeln('<error>No session of tunnel "' . $tunnel::getName() . '" has the hash "' . $hash . '".</error>');
 
             return Command::FAILURE;

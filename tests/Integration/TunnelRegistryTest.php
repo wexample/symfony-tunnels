@@ -7,8 +7,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 use Wexample\SymfonyTunnels\Service\TunnelRegistry;
 use Wexample\SymfonyTunnels\Service\TunnelSessionService;
-use Wexample\SymfonyTunnels\Tests\Traits\DatabaseTestTrait;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\TestTunnelManagerService;
+use Wexample\SymfonyTunnels\Tests\Traits\DatabaseTestTrait;
 
 class TunnelRegistryTest extends KernelTestCase
 {

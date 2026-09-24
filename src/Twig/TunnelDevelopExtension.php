@@ -26,7 +26,7 @@ class TunnelDevelopExtension extends AbstractExtension
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if (!$request?->hasSession()) {
+        if (! $request?->hasSession()) {
             return [];
         }
 

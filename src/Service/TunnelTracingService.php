@@ -108,7 +108,7 @@ class TunnelTracingService
 
     private function traceMark(TunnelCursor $cursor): string
     {
-        if (!$cursor->manager->getSession()) {
+        if (! $cursor->manager->getSession()) {
             return self::MARK_CURSOR;
         }
 

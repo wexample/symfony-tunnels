@@ -68,7 +68,7 @@ class TunnelExtension extends AbstractExtension
     {
         $previous = $cursor->previous;
 
-        if (!$previous || !$previous->step->allowDirectAccess($previous, $cursor)) {
+        if (! $previous || ! $previous->step->allowDirectAccess($previous, $cursor)) {
             return null;
         }
 
@@ -79,7 +79,7 @@ class TunnelExtension extends AbstractExtension
     {
         $next = $cursor->manager->selectNextCursor($cursor);
 
-        if (!$next || !$next->step->allowDirectAccess($next, $cursor)) {
+        if (! $next || ! $next->step->allowDirectAccess($next, $cursor)) {
             return null;
         }
 
@@ -94,7 +94,7 @@ class TunnelExtension extends AbstractExtension
      */
     private function buildStepperStep(?TunnelNavigationItem $item): array
     {
-        if (!$item) {
+        if (! $item) {
             return ['unknown' => true];
         }
 

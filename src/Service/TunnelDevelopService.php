@@ -51,7 +51,7 @@ class TunnelDevelopService
             $sessionId = $browserSession->get(AbstractTunnelController::BROWSER_SESSION_KEY_PREFIX . $name);
             $session = $sessionId ? $this->tunnelSessionRepository->find($sessionId) : null;
 
-            if (!$session) {
+            if (! $session) {
                 continue;
             }
 

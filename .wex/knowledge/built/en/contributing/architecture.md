@@ -1,99 +1,78 @@
 ## Architecture
 
-The package is a Symfony bundle that provides an abstract framework for sequential multi-step flows. Application code subclasses one manager service and one step class per step; the bundle supplies the plumbing that connects them.
+A tunnel is a tree built fresh at every request from service declarations, walked by a visitor whose progress lives in the database. The sections below follow a request through the layers, from the bundle wiring to the rendered step.
 
-### Bundle bootstrap
+### Bundle and dependency injection
 
-src/WexampleSymfonyTunnelsBundle.php extends `AbstractBundle` from `wexample/symfony-helpers` and is the Symfony bundle entry point. It carries no logic of its own.
+src/WexampleSymfonyTunnelsBundle.php implements `LoaderBundleInterface`, so its `assets/` directory — partials and translations — is reachable as `@WexampleSymfonyTunnelsBundle/…`, and `PseudocodeBundleInterface`, so its entities are exported to TypeScript. On `build()` it registers src/DependencyInjection/Compiler/TunnelControllersCompilerPass.php.
 
-src/DependencyInjection/WexampleSymfonyTunnelsExtension.php calls `$this->loadConfig(__DIR__, $container)`, which loads src/Resources/config/services.yaml. That file registers everything under `src/Service/` with autowiring and autoconfiguration, tagged `controller.service_arguments`.
+src/DependencyInjection/WexampleSymfonyTunnelsExtension.php loads src/Resources/config/services.yaml and registers two autoconfiguration rules, because tunnels and their controllers live in applications, outside this bundle's own services: every `AbstractTunnelManagerService` gets the tag `wexample.symfony_tunnels.tunnel`, every `AbstractTunnelController` the tag `wexample.symfony_tunnels.controller`.
 
-### Manager: `AbstractTunnelManagerService`
+src/Service/TunnelRegistry.php receives the tagged managers and indexes them by name. The compiler pass turns the tagged controllers into a list of class names, the `wexample_symfony_tunnels.controllers` parameter, so that loading routes reads attributes without building controllers.
 
-src/Service/AbstractTunnelManagerService.php is the orchestrator. Application code creates one concrete subclass per tunnel and must implement:
+### Tree: cursors and steps
 
-```php
-public static function getTunnelName(): string;
-```
+src/Service/Step/AbstractTunnelStep.php is the base of every step. A step is a shared service and holds no state: every hook receives the cursor it acts on. `getAllowedNextSteps()` lists what may follow, either a step or `['step' => …, 'options' => […], 'name' => …]`; every ancestor may rewrite that list through `alterNextStepAllowedFollowings()`.
 
-The manager holds the ordered list of steps, set once via `setTunnelSteps(array $steps)`, which assigns each step its zero-based position and back-reference to the manager.
+src/Service/AbstractTunnelManagerService.php names a tunnel and its entrypoint step. `createEntrypoint()` asks the entrypoint step for its cursor, which recursively creates the whole tree. A step reached by two paths gives two cursors: the structure is a tree, not a graph. The manager registers each cursor by hash and refuses one whose step and options already appear above it, throwing src/Exception/TunnelCycleException.php.
 
-**`handleRequest(string $controllerClassName, Request $request, ?string $stepName): Response|TunnelStep|null`** is the single entry point a controller calls. Its sequence:
+src/Class/TunnelCursor.php is one node: a step, its options, its parent and children, and a hash built from the manager class, the step class, the parent hash and the options. The hash is stable across requests, which is what makes it the key of everything stored for the cursor. The cursor also carries the tree walks (`forEachPreviousRecursive`, `forEachCursorBetween`…), the option matching (`hasOptions` for "at least these", `hasSameOptions` for "exactly these"), and the completion flag, a cursor variable named `tunnel-step-complete`.
 
-1. No `$stepName` → redirect to step 0.
-2. Resolve a `TunnelStep` by matching `$stepName` against each step's static `$name`.
-3. `initSession()` — find or create a `TunnelSession` record in the database; store its ID in the PHP session under the key `tunnel-{tunnelName}`. An existing session is reused only when it is not completed, is less than one day old, the client IP has not changed, and the authenticated user matches.
-4. `preventAccess()` — scan all steps whose position precedes the requested one; if any is incomplete, redirect to the earliest incomplete step (or step 0 if none found).
-5. If the step is the first, clear the `completed` tracking object stored in the session.
-6. Delegate to `$step->handleRequest($request)`.
+The manager is the one stateful object of a request: it holds the cursors, the current cursor and the session. It is not shared between tunnels.
 
-Navigation helpers (`adaptiveRedirectToNext`, `redirectToNext`, `redirectToOffset`, `redirectToStep`, `buildStepUrl`) are all thin wrappers that resolve the target `TunnelStep` by position offset and generate its URL.
+### Session and variables
 
-The manager keeps two separate stores:
+src/Entity/TunnelSession.php is one walk through one tunnel: its name, a status from src/Enum/TunnelSessionStatus.php, a 32-character random resume hash, the last cursor displayed, the visitor's security identifier when there is one, and the variables. src/Entity/TunnelSessionVariable.php holds one JSON value, scoped to a cursor hash or, when that hash is null, to the whole session; the two scopes never overlap. `initial` marks the values the tunnel was opened with.
 
-- **PHP browser session** — `getBrowserSessionVariable` / `setBrowserSessionVariable`, keyed under `tunnel-{tunnelName}` in `Request::getSession()`. Holds the tunnel-session DB id and any transient data.
-- **Database session** — `getTunnelSessionVariable` / `setTunnelSessionVariable`, serialised into the `TunnelSession` entity's `data` field via `TunnelSessionCrudService`.
+The engine reaches that storage through src/Interface/TunnelSessionStorageInterface.php, implemented by src/Service/TunnelSessionService.php. The indirection is what lets the unit tests run the engine on an in-memory storage.
 
-### Step: `TunnelStep`
+`TunnelSessionService::findOrCreateSession()` looks for the session a request belongs to: the one its `?tunnel=` hash names, then the one the browser session remembers, then a new one. A found session is reused only for the same tunnel and the same user identifier, and only while it is not expired — opened sessions expire after one day, completed and pending ones never do. `initCursorSession()` starts over when the step asks for it (`tunnelSessionRecreate()`, true for a completed session by default), and `purgeExpiredSessions()` drops expired sessions after letting every step clean up in `onSessionDestroy()`.
 
-src/Service/Step/TunnelStep.php is the abstract base for every step. A step owns:
+The values a tunnel is opened with are declared in `getInitVariablesConfig()` (`type`, `required`, `default`, `autoInit`), checked by `setInitialVariables()`, and stored as initial variables — entities as their identifier. `autoInitVariables()` rebuilds them from a session without a request.
 
-| Member | Purpose |
-|---|---|
-| `static string $name` | URL slug and session key |
-| `int $position` | Zero-based index, set by the manager |
-| `AbstractTunnelManagerService $manager` | Back-reference |
+### Routing
 
-**`handleRequest(Request $request): self|Response|null`** returns `$this` by default, signalling the controller to render the step's template. Returning a `Response` redirects or terminates the request.
+src/Attribute/TunnelRoute.php marks a controller action as a tunnel entry point. src/Routing/TunnelRouteLoader.php, a `tunnel_routes` loader built on `symfony-helpers`' `AbstractRouteLoader`, turns each one into a route named `tunnel_<tunnel>_<name>` on `/tunnel/<controller>/<name>/<prefix>/{step?}/<suffix>`, the name being left out for `index`. The application imports it with src/Resources/config/routes.yaml.
 
-**Access control** is enforced by `preventAccess()`, which delegates to `allowDirectAccess()`. The default rule: step 0 is always accessible; any later step requires its predecessor to be complete. Override `redirectToStepPosition(): ?int` to force a redirect from within a step regardless of completion state.
+src/Service/TunnelRoutingService.php builds the URL of a cursor: the tunnel route, the route params of the manager and the step (`step=<name>` by default), and the options under `cursor-options` when the cursor has some.
 
-**Completion** is tracked as a `completed` object stored in the database session. `setCompleted()` writes `true` at key `step-{position}`; `isCompleted()` reads it back.
+### Request
 
-**Template resolution**: `getView()` returns `tunnels/{tunnelName}/{stepName}.html.twig`. `getViewParams()` passes `['tunnel' => $this->getManager()]`.
+src/Controller/AbstractTunnelController.php extends `symfony-loader`'s `AbstractPagesController`. `handleTunnelRequest()`:
 
-**Translation domain**: `getTranslationDomain()` returns `tunnels.{tunnelName}.{stepName}`, which `trans(string $key)` prefixes when building translation keys.
+1. Finds the manager in the registry, builds the tree, purges expired sessions and applies the opening values — a mismatch is a 404.
+2. Finds or creates the session and hands it to the manager.
+3. Guesses the cursor: every cursor whose route params the request carries is a candidate, and `AbstractTunnelManagerService::selectCurrentCursor()` narrows them down with the step's own veto, the query options, the path from the last cursor displayed and the branch it had recorded (`redirects-to`), then keeps the one closest to the root.
+4. Without a cursor, redirects to the entrypoint when no step was named, and answers 404 when one was.
+5. Asks the step whether it `needsRedirect()`. A `RedirectResponse` is returned as is; a cursor becomes a redirect to its URL, after completing the step if its strategy completes on redirect. Every redirect keeps `__layout`, so a tunnel opened in a modal stays in it.
+6. Otherwise calls `initAsCurrentStep()` and renders `tunnels/<tunnel>/<step>` from the controller's front directory, with `tunnel`, `tunnelStep` and `tunnelCursor`.
 
-### Form integration traits
+`initAsCurrentStep()` is where the rules of the path apply: it records the last cursor displayed, notifies the ancestors, completes a parent waiting for its child (`ON_NEXT_INIT`), and when the step had already sent the visitor down a branch, calls `onPreviousStepLoading()` on it — which by default drops every cursor variable of that branch. Then it applies the step's own strategy from src/Enum/TunnelStepCompleteStrategy.php.
 
-When a step needs to handle a Symfony form, two traits wire the step to an application-side form processor.
+### Form steps
 
-src/Service/Step/Traits/FormTunnelStepTrait.php is mixed into the step subclass. Its `init()` method calls `$this->getFormProcessor()->setTunnelStep($this)`, creating the cross-reference. It overrides `handleRequest()`:
+src/Service/Step/AbstractFormTunnelStep.php is a step showing a form, completed only when the form is (`MANUAL` strategy). It names an ordinary `symfony-forms` processor through `getFormProcessor()`, which does what a valid submission means for the application, and gives the form its starting data through `buildFormData()`. The step itself only says where the tunnel goes next, in `onFormValid()`: by default it marks itself complete and returns the next cursor, while returning null keeps the visitor on the step.
 
-- **GET** → `$formProcessor->createForm()`
-- **POST** → `$formProcessor->handleSubmission($request)`
+`AbstractTunnelController::handleFormStep()` shows the form on GET. On POST it lets the processor handle the submission, asks the processor whether the form is valid — the same check that decides whether its own `onValid()` runs — and turns the step's answer into the processor's success action: `embed_redirect` to the next cursor when the request comes from a modal, panel or overlay, `redirect` otherwise, `embed_stay` when the step returned null. A JSON request gets the payload of `symfony-forms`' `FormResponsePayloadBuilder`; a page request gets a redirect, or the form again with its errors. The form posts back to the step URL, so its class must not set `$ajax = true`.
 
-After either branch it calls `onFormRender(FormInterface $form)`, then asks the processor for a response via `handleSubmissionResponseFromForm($form)`. If the processor returns a `Response` (a redirect on success), that is returned; otherwise `$this` is returned so the controller renders the template. `getViewParams()` is extended to inject `form` (a `FormView`) alongside `tunnel`.
+### Asynchronous resume
 
-The hooks `onFormRender(FormInterface $form)` and `onFormValid(FormInterface $form)` are empty by default and intended for override.
+src/Service/TunnelResumeService.php takes up a flow left waiting on an outside event — a payment confirmed by a webhook — with no visitor and no URL. The waiting step sets its session to `pending_async_action` and keeps the identifier the event will carry as a variable. The application's event handler calls `resumeByVariable($name, $value, $onCursor)`, which finds every pending session holding that value, rebuilds its tunnel, restores its opening values through `autoInitVariables()`, and hands the cursor the variable belongs to to the callback.
 
-src/Service/FormProcessor/Traits/TunnelFormProcessorTrait.php is mixed into the application-side form processor. It holds `?TunnelStep $tunnelStep` and routes the processor's own lifecycle callbacks (`onRender`, `onValid`) back into the step's hooks:
+### Access rules
 
-```php
-public function onRender(FormInterface $form): void
-{
-    $this->getTunnelStep()->onFormRender($form);
-}
+`AbstractTunnelStep::needsRedirect()` sends the visitor to the direct parent when it is incomplete, unless that parent completes on its child, then to the first incomplete ancestor under the default strategy of src/Enum/TunnelStepRedirectStrategy.php.
 
-public function onValid(FormInterface $form): void
-{
-    $this->getTunnelStep()->onFormValid($form);
-}
-```
+`allowDirectAccess()` decides whether a link is offered: any cursor between the two ends can veto it through `allowAccessOf()`, and a link forward requires every ancestor of the target to be complete, so it never leads to a redirect back.
 
-### Call path through a request
+### Navigation and tooling
 
-```
-Controller
-  └─ AbstractTunnelManagerService::handleRequest()
-       ├─ (no step) → RedirectResponse to step 0
-       ├─ getStepByName()          resolve TunnelStep
-       ├─ initSession()            find/create TunnelSession in DB
-       ├─ preventAccess()          redirect if prerequisites unmet
-       └─ TunnelStep::handleRequest()
-            ├─ (plain step)        return $this  →  controller renders getView()
-            └─ (FormTunnelStepTrait)
-                 ├─ GET  createForm()
-                 ├─ POST handleSubmission() → onFormValid() → setCompleted() + redirect
-                 └─ return $this or Response
-```
+src/Helper/TunnelTreeHelper.php reads a built tree: its root-to-leaf paths, its map of sections (one row per step and options, in an order every path agrees with), and the known steps around a cursor — the step groups every remaining path goes through, with a null where paths diverge. src/Class/TunnelNavigationItem.php and src/Class/TunnelTreeSection.php carry the results.
+
+src/Twig/TunnelExtension.php exposes `tunnel_cursor_url`, `tunnel_stepper` — the options of the design system stepper, a divergence becoming an `unknown` step — and `tunnel_previous_url` / `tunnel_next_url`. The partials assets/partials/tunnel-navigation.html.twig and assets/partials/tunnel-buttons.html.twig use them.
+
+src/Service/TunnelTracingService.php draws the tree and the map as text for src/Command/InfoCommand.php, `tunnels:info <name>`.
+
+### Tests
+
+`tests/Fixtures/App` is a kernel on in-memory SQLite with the loader, translations, forms and tunnels bundles. `tests/Fixtures/Tunnel` holds the test tunnel ported from the legacy code, the executable specification of the engine: step two appears three times with different options, step three bis three times as named variants, and the steps exercise every completion strategy, internal and external redirects, a direct-access veto and a branch reset. A second, two-step tunnel in `tests/Fixtures/Tunnel/FormTunnel` covers form steps. `tests/Unit` runs the engine on the in-memory storage; `tests/Integration` runs it on the database and over HTTP.

@@ -129,10 +129,10 @@ This gives the route `tunnel_demo_index` on `/tunnel/demo-tunnel/{step?}`. `#[Tu
 
 Each step renders `tunnels/<tunnel>/<step>.html.twig` from the controller's front directory — `@front` for an application controller, the bundle's `assets/` for a bundle controller. The template gets `tunnel`, `tunnelStep` and `tunnelCursor`, and can include:
 
-{% raw %}```twig
+```twig
 {%- include '@WexampleSymfonyTunnelsBundle/partials/tunnel-navigation.html.twig' -%}
 {%- include '@WexampleSymfonyTunnelsBundle/partials/tunnel-buttons.html.twig' -%}
-```{% endraw %}
+```
 
 `tunnel_cursor_url(cursor)` gives the URL of any cursor.
 

@@ -50,7 +50,7 @@ class InMemoryTunnelSessionStorage implements TunnelSessionStorageInterface
         $sessionId = spl_object_id($session);
         $scope = $this->scope($cursorHash);
 
-        if (!isset($this->values[$sessionId][$scope][$name])) {
+        if (! isset($this->values[$sessionId][$scope][$name])) {
             return false;
         }
 

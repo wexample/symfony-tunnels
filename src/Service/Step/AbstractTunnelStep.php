@@ -134,7 +134,7 @@ abstract class AbstractTunnelStep
      */
     public function needsRedirect(TunnelCursor $cursor): null|RedirectResponse|TunnelCursor
     {
-        if ($cursor->previous && !$cursor->previous->isComplete()) {
+        if ($cursor->previous && ! $cursor->previous->isComplete()) {
             // The direct parent is incomplete on purpose: it asked this very
             // step to be the one completing it.
             if ($cursor->previous->step->completeStrategy() === TunnelStepCompleteStrategy::ON_NEXT_INIT) {
@@ -174,17 +174,17 @@ abstract class AbstractTunnelStep
         $cursorFrom->forEachCursorBetween(
             $cursor,
             static function (TunnelCursor $cursorBetween) use ($cursor, &$allowed): void {
-                if ($allowed && !$cursorBetween->step->allowAccessOf($cursorBetween, $cursor)) {
+                if ($allowed && ! $cursorBetween->step->allowAccessOf($cursorBetween, $cursor)) {
                     $allowed = false;
                 }
             }
         );
 
-        if (!$allowed) {
+        if (! $allowed) {
             return false;
         }
 
-        if (!$cursorFrom->hasNextRecursive($cursor)) {
+        if (! $cursorFrom->hasNextRecursive($cursor)) {
             return true;
         }
 
