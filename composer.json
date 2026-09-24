@@ -9,6 +9,11 @@
       "Wexample\\SymfonyTunnels\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Wexample\\SymfonyTunnels\\Tests\\": "tests/"
+    }
+  },
   "authors": [
     {
       "name": "weeger",
@@ -17,8 +22,24 @@
   ],
   "require": {
     "php": ">=8.5",
-    "wexample/symfony-helpers": ">=9.0.0"
+    "doctrine/orm": "^3.0",
+    "wexample/symfony-helpers": ">=9.0.0",
+    "wexample/symfony-forms": ">=7.0.0",
+    "wexample/symfony-translations": ">=4.0.0"
   },
+  "require-dev": {
+    "phpunit/phpunit": "*",
+    "wexample/symfony-testing": ">=2.0.0"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../*",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
   "extra": {
     "install": {
       "bundle_env": "all"

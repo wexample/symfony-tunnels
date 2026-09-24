@@ -1,0 +1,13 @@
+framework:
+  test: true
+  secret: "test"
+
+doctrine:
+  orm:
+    enable_native_lazy_objects: true
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: true
