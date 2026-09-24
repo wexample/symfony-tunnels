@@ -50,6 +50,6 @@ class TunnelRegistryTest extends KernelTestCase
         );
 
         $this->assertSame(1, $tester->execute(['name' => 'unknown']));
-        $this->assertStringContainsString('Known tunnels: test', $tester->getDisplay());
+        $this->assertMatchesRegularExpression('/Known tunnels: .*\btest\b/', $tester->getDisplay());
     }
 }

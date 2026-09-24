@@ -2,17 +2,23 @@
 
 namespace Wexample\SymfonyTunnels\Controller;
 
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Wexample\SymfonyForms\Service\FormProcessor\AbstractFormProcessor;
+use Wexample\SymfonyForms\Service\FormProcessor\FormResponsePayloadBuilder;
 use Wexample\SymfonyHelpers\Helper\RequestHelper;
 use Wexample\SymfonyLoader\Controller\AbstractPagesController;
+use Wexample\SymfonyLoader\Helper\AdaptiveRequestHelper;
 use Wexample\SymfonyLoader\Service\AdaptiveRendererService;
 use Wexample\SymfonyLoader\Service\PageService;
 use Wexample\SymfonyTunnels\Class\TunnelCursor;
 use Wexample\SymfonyTunnels\Enum\TunnelStepCompleteStrategy;
 use Wexample\SymfonyTunnels\Exception\TunnelInitVariableException;
 use Wexample\SymfonyTunnels\Service\AbstractTunnelManagerService;
+use Wexample\SymfonyTunnels\Service\Step\AbstractFormTunnelStep;
 use Wexample\SymfonyTunnels\Service\TunnelRegistry;
 use Wexample\SymfonyTunnels\Service\TunnelRoutingService;
 use Wexample\SymfonyTunnels\Service\TunnelSessionService;
@@ -43,6 +49,7 @@ abstract class AbstractTunnelController extends AbstractPagesController
         protected readonly TunnelRegistry $tunnelRegistry,
         protected readonly TunnelSessionService $tunnelSessionService,
         protected readonly TunnelRoutingService $tunnelRoutingService,
+        protected readonly FormResponsePayloadBuilder $formResponsePayloadBuilder,
     ) {
         parent::__construct($adaptiveRendererService, $pageService);
     }
@@ -109,15 +116,88 @@ abstract class AbstractTunnelController extends AbstractPagesController
         $tunnel->setCurrentCursor($cursor);
         $cursor->step->initAsCurrentStep($cursor);
 
+        if ($cursor->step instanceof AbstractFormTunnelStep) {
+            return $this->handleFormStep($cursor, $request);
+        }
+
         return $this->renderTunnelStep($cursor);
     }
 
-    protected function renderTunnelStep(TunnelCursor $cursor): Response
-    {
+    protected function renderTunnelStep(
+        TunnelCursor $cursor,
+        array $parameters = [],
+    ): Response {
         return $this->adaptiveRender(
             $this->buildTemplatePath($cursor->step->buildStepView($cursor)),
-            $this->buildTunnelStepViewParams($cursor)
+            $parameters + $this->buildTunnelStepViewParams($cursor)
         );
+    }
+
+    /**
+     * Show the form of the step, or handle its submission. The form posts back
+     * to the step URL; a valid one moves the visitor to wherever the step says,
+     * inside the modal or panel the tunnel was opened in when there is one.
+     */
+    protected function handleFormStep(
+        TunnelCursor $cursor,
+        Request $request,
+    ): Response {
+        /** @var AbstractFormTunnelStep $step */
+        $step = $cursor->step;
+        $processor = $step->getFormProcessor($cursor);
+        $data = $step->buildFormData($cursor);
+
+        if (!$request->isMethod(Request::METHOD_POST)) {
+            return $this->renderFormStep($cursor, $processor->createForm($data));
+        }
+
+        $form = $processor->handleSubmissionWithData($request, $data);
+        $next = null;
+
+        // The processor has the last word on validity, as it does when it
+        // decides whether to call its own onValid().
+        if ($form->isSubmitted() && $processor->formIsValid($form)) {
+            $next = $step->onFormValid($form, $cursor);
+            $this->setFormSuccessAction($processor, $next, $request);
+        }
+
+        if (RequestHelper::isJsonRequest($request)) {
+            return new JsonResponse($this->formResponsePayloadBuilder->build($processor, $form));
+        }
+
+        if ($next) {
+            return $this->redirectToCursor($next, $request);
+        }
+
+        return $this->renderFormStep($cursor, $form);
+    }
+
+    private function renderFormStep(
+        TunnelCursor $cursor,
+        FormInterface $form,
+    ): Response {
+        return $this->renderTunnelStep($cursor, ['form' => $form->createView()]);
+    }
+
+    private function setFormSuccessAction(
+        AbstractFormProcessor $processor,
+        ?TunnelCursor $next,
+        Request $request,
+    ): void {
+        if (!$next) {
+            $processor->setSuccessAction(['type' => AbstractFormProcessor::ACTION_EMBED_STAY]);
+
+            return;
+        }
+
+        $url = $this->buildCursorRedirectUrl($next, $request);
+
+        $processor->setSuccessAction([
+            'type' => AdaptiveRequestHelper::isEmbedded($request)
+                ? AbstractFormProcessor::ACTION_EMBED_REDIRECT
+                : AbstractFormProcessor::ACTION_REDIRECT,
+            'url' => $url,
+        ]);
     }
 
     protected function buildTunnelStepViewParams(TunnelCursor $cursor): array
@@ -225,14 +305,19 @@ abstract class AbstractTunnelController extends AbstractPagesController
         TunnelCursor $cursor,
         Request $request,
     ): RedirectResponse {
+        return $this->redirect($this->buildCursorRedirectUrl($cursor, $request));
+    }
+
+    private function buildCursorRedirectUrl(
+        TunnelCursor $cursor,
+        Request $request,
+    ): string {
         $params = [];
 
         if ($layout = $request->query->get(self::QUERY_STRING_LAYOUT)) {
             $params[self::QUERY_STRING_LAYOUT] = $layout;
         }
 
-        return $this->redirect(
-            $this->tunnelRoutingService->buildCursorUrl($cursor, $params)
-        );
+        return $this->tunnelRoutingService->buildCursorUrl($cursor, $params);
     }
 }

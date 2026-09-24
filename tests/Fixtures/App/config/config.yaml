@@ -3,6 +3,7 @@ framework:
   secret: "test"
   session:
     storage_factory_id: session.storage.factory.mock_file
+  form: true
 
 wexample_symfony_loader:
   front_paths:
@@ -24,6 +25,9 @@ services:
   Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\:
     resource: '../../Tunnel/'
     exclude: '../../Tunnel/{Cycle,InMemoryTunnelSessionStorage.php}'
+
+  Wexample\SymfonyTunnels\Tests\Fixtures\Service\:
+    resource: '../../Service/'
 
   Wexample\SymfonyTunnels\Tests\Fixtures\App\Controller\:
     resource: '../Controller/'

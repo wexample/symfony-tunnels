@@ -3,6 +3,7 @@
 namespace Wexample\SymfonyTunnels\Tests\Fixtures\App;
 
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+use Wexample\SymfonyForms\WexampleSymfonyFormsBundle;
 use Wexample\SymfonyLoader\WexampleSymfonyLoaderBundle;
 use Wexample\SymfonyTesting\Tests\Fixtures\AbstractFixtureKernel;
 use Wexample\SymfonyTranslations\WexampleSymfonyTranslationsBundle;
@@ -20,6 +21,7 @@ class AppKernel extends AbstractFixtureKernel
         return [
             new WexampleSymfonyLoaderBundle(),
             new WexampleSymfonyTranslationsBundle(),
+            new WexampleSymfonyFormsBundle(),
             new WexampleSymfonyTunnelsBundle(),
         ];
     }

@@ -27,7 +27,8 @@
     "wexample/symfony-forms": ">=8.0.0",
     "wexample/symfony-translations": ">=4.0.0",
     "wexample/php-pseudocode": ">=1.0.0",
-    "wexample/symfony-pseudocode": ">=3.0.0"
+    "wexample/symfony-pseudocode": ">=3.0.0",
+    "symfony/form": "^7.4"
   },
   "require-dev": {
     "phpunit/phpunit": "*",
