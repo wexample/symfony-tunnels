@@ -5,5 +5,5 @@ services:
         public: false
 
     Wexample\SymfonyTunnels\:
-        resource: '../../{Service}'
+        resource: '../../{Repository,Service}'
         tags: ['controller.service_arguments']

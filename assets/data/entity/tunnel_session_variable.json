@@ -1,0 +1,252 @@
+{
+    "name": "tunnel_session_variable",
+    "type": "class",
+    "properties": [
+        {
+            "name": "id",
+            "type": "Symfony\\Component\\Uid\\Uuid"
+        },
+        {
+            "name": "dateCreated",
+            "type": "DateTimeInterface",
+            "nullable": true,
+            "default": null
+        },
+        {
+            "name": "name",
+            "type": "string",
+            "nullable": true,
+            "default": null
+        },
+        {
+            "name": "tunnelSession",
+            "type": "TunnelSession",
+            "nullable": true,
+            "default": null
+        },
+        {
+            "name": "value",
+            "type": "mixed",
+            "default": null
+        },
+        {
+            "name": "cursorHash",
+            "type": "string",
+            "nullable": true,
+            "default": null
+        },
+        {
+            "name": "initial",
+            "type": "bool",
+            "default": false
+        }
+    ],
+    "methods": [
+        {
+            "type": "method",
+            "name": "__construct"
+        },
+        {
+            "type": "method",
+            "name": "buildEntityPath",
+            "parameters": [
+                {
+                    "type": "string",
+                    "name": "className"
+                }
+            ],
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getEntityKeyName",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getEntityShortName",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getId",
+            "return": {
+                "type": "Symfony\\Component\\Uid\\Uuid"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setId",
+            "parameters": [
+                {
+                    "type": "Symfony\\Component\\Uid\\Uuid",
+                    "name": "id"
+                }
+            ],
+            "return": {
+                "type": "void"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getTableizedName",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getCamelName",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getDateCreated",
+            "return": {
+                "type": "DateTimeInterface"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setDateCreatedNow",
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setDateCreated",
+            "parameters": [
+                {
+                    "type": "DateTimeInterface",
+                    "name": "dateCreated"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getName",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setName",
+            "parameters": [
+                {
+                    "type": "string",
+                    "name": "name"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setNameFromTitle",
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getTunnelSession",
+            "return": {
+                "type": "TunnelSession"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setTunnelSession",
+            "parameters": [
+                {
+                    "type": "TunnelSession",
+                    "name": "tunnelSession"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getValue",
+            "return": {
+                "type": "mixed"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setValue",
+            "parameters": [
+                {
+                    "type": "mixed",
+                    "name": "value"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getCursorHash",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setCursorHash",
+            "parameters": [
+                {
+                    "type": "string",
+                    "name": "cursorHash"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "isGlobal",
+            "return": {
+                "type": "bool"
+            }
+        },
+        {
+            "type": "method",
+            "name": "isInitial",
+            "return": {
+                "type": "bool"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setInitial",
+            "parameters": [
+                {
+                    "type": "bool",
+                    "name": "initial"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        }
+    ]
+}

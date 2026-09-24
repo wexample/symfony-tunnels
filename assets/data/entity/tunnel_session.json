@@ -1,0 +1,357 @@
+{
+    "name": "tunnel_session",
+    "type": "class",
+    "properties": [
+        {
+            "name": "id",
+            "type": "Symfony\\Component\\Uid\\Uuid"
+        },
+        {
+            "name": "dateCreated",
+            "type": "DateTimeInterface",
+            "nullable": true,
+            "default": null
+        },
+        {
+            "name": "tunnel",
+            "type": "string",
+            "nullable": true,
+            "default": null
+        },
+        {
+            "name": "status",
+            "type": "TunnelSessionStatus",
+            "default": null
+        },
+        {
+            "name": "hash",
+            "type": "string"
+        },
+        {
+            "name": "lastAccessedCursorHash",
+            "type": "string",
+            "nullable": true,
+            "default": null
+        },
+        {
+            "name": "userIdentifier",
+            "type": "string",
+            "nullable": true,
+            "default": null
+        },
+        {
+            "name": "ipV4",
+            "type": "string",
+            "nullable": true,
+            "default": null
+        },
+        {
+            "name": "browserData",
+            "type": "string",
+            "nullable": true,
+            "default": null
+        },
+        {
+            "name": "tunnelSessionVariables",
+            "type": "Collection",
+            "description": "TunnelSessionVariable>"
+        }
+    ],
+    "methods": [
+        {
+            "type": "method",
+            "name": "buildEntityPath",
+            "parameters": [
+                {
+                    "type": "string",
+                    "name": "className"
+                }
+            ],
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getEntityKeyName",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getEntityShortName",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getId",
+            "return": {
+                "type": "Symfony\\Component\\Uid\\Uuid"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setId",
+            "parameters": [
+                {
+                    "type": "Symfony\\Component\\Uid\\Uuid",
+                    "name": "id"
+                }
+            ],
+            "return": {
+                "type": "void"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getTableizedName",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getCamelName",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getDateCreated",
+            "return": {
+                "type": "DateTimeInterface"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setDateCreatedNow",
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setDateCreated",
+            "parameters": [
+                {
+                    "type": "DateTimeInterface",
+                    "name": "dateCreated"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "__construct",
+            "description": ""
+        },
+        {
+            "type": "method",
+            "name": "getTunnel",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setTunnel",
+            "parameters": [
+                {
+                    "type": "string",
+                    "name": "tunnel"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getStatus",
+            "return": {
+                "type": "TunnelSessionStatus"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setStatus",
+            "parameters": [
+                {
+                    "type": "TunnelSessionStatus",
+                    "name": "status"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "hasStatus",
+            "parameters": [
+                {
+                    "type": "TunnelSessionStatus",
+                    "name": "status"
+                }
+            ],
+            "return": {
+                "type": "bool"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getHash",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setHash",
+            "parameters": [
+                {
+                    "type": "string",
+                    "name": "hash"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getLastAccessedCursorHash",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setLastAccessedCursorHash",
+            "parameters": [
+                {
+                    "type": "string",
+                    "name": "lastAccessedCursorHash"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getUserIdentifier",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setUserIdentifier",
+            "parameters": [
+                {
+                    "type": "string",
+                    "name": "userIdentifier"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getIpV4",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setIpV4",
+            "parameters": [
+                {
+                    "type": "string",
+                    "name": "ipV4"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getBrowserData",
+            "return": {
+                "type": "string"
+            }
+        },
+        {
+            "type": "method",
+            "name": "setBrowserData",
+            "parameters": [
+                {
+                    "type": "string",
+                    "name": "browserData"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "getTunnelSessionVariables",
+            "description": "",
+            "return": {
+                "type": "Collection",
+                "description": "TunnelSessionVariable>"
+            }
+        },
+        {
+            "type": "method",
+            "name": "addTunnelSessionVariable",
+            "parameters": [
+                {
+                    "type": "TunnelSessionVariable",
+                    "name": "tunnelSessionVariable"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "removeTunnelSessionVariable",
+            "parameters": [
+                {
+                    "type": "TunnelSessionVariable",
+                    "name": "tunnelSessionVariable"
+                }
+            ],
+            "return": {
+                "type": "self"
+            }
+        },
+        {
+            "type": "method",
+            "name": "isExpired",
+            "description": "A session is expired once it has been opened for too long. Completed and\npending sessions are kept: something else decides when they are done.",
+            "parameters": [
+                {
+                    "type": "DateTimeInterface",
+                    "name": "expirationDate"
+                }
+            ],
+            "return": {
+                "type": "bool"
+            }
+        }
+    ]
+}
