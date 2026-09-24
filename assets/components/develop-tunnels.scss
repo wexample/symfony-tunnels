@@ -1,0 +1,47 @@
+.develop-tunnels {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.75rem;
+  font-size: 0.85em;
+}
+
+.develop-tunnels--title {
+  margin: 0 0 0.5rem;
+}
+
+.develop-tunnels--meta {
+  font-weight: normal;
+  opacity: 0.6;
+  margin-left: 0.5rem;
+}
+
+.develop-tunnels--map td,
+.develop-tunnels--variables td,
+.develop-tunnels--variables th {
+  padding: 0.1rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.develop-tunnels--marks {
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.develop-tunnels--mark {
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+  opacity: 0.4;
+
+  &.is-complete {
+    opacity: 1;
+    color: var(--color-warning, #d4a017);
+  }
+
+  &.is-current {
+    opacity: 1;
+    color: var(--color-primary, #2f6fed);
+  }
+}

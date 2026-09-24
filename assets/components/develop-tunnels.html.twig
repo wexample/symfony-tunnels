@@ -1,0 +1,50 @@
+{#- The tunnels this browser is walking: where each session stands on the map
+    of its tunnel, and what it holds. -#}
+{%- set sessions = tunnel_develop_sessions() -%}
+{%- set marks = { none: '|', cursor: '●', complete: '●', current: '●' } -%}
+<div class="develop-tunnels">
+    {%- for session in sessions -%}
+        <section class="develop-tunnels--session">
+            <h3 class="develop-tunnels--title">
+                {{ session.tunnel }}
+                <span class="develop-tunnels--meta">
+                    {{ session.status }} · {{ session.hash }} · {{ session.created }}
+                    {%- if session.current %} · on {{ session.current }}{% endif -%}
+                </span>
+            </h3>
+
+            <table class="develop-tunnels--map">
+                {%- for section in session.sections -%}
+                    <tr>
+                        <td class="develop-tunnels--marks">
+                            {%- for mark in section.marks -%}
+                                <span class="develop-tunnels--mark is-{{ mark }}">{{ marks[mark] }}</span>
+                            {%- endfor -%}
+                        </td>
+                        <td>{{ section.label }}</td>
+                    </tr>
+                {%- endfor -%}
+            </table>
+
+            <table class="develop-tunnels--variables">
+                <thead>
+                    <tr><th>Scope</th><th>Name</th><th>Value</th><th>Initial</th></tr>
+                </thead>
+                <tbody>
+                    {%- for variable in session.variables -%}
+                        <tr>
+                            <td>{{ variable.scope }}</td>
+                            <td>{{ variable.name }}</td>
+                            <td><code>{{ variable.value }}</code></td>
+                            <td>{{ variable.initial ? 'yes' : '' }}</td>
+                        </tr>
+                    {%- else -%}
+                        <tr><td colspan="4">No variable.</td></tr>
+                    {%- endfor -%}
+                </tbody>
+            </table>
+        </section>
+    {%- else -%}
+        <p class="develop-tunnels--empty">This browser has no tunnel session yet.</p>
+    {%- endfor -%}
+</div>
