@@ -5,6 +5,7 @@ namespace Wexample\SymfonyTunnels\Tests\Fixtures\App;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Wexample\SymfonyForms\WexampleSymfonyFormsBundle;
 use Wexample\SymfonyLoader\WexampleSymfonyLoaderBundle;
+use Wexample\SymfonySeo\WexampleSymfonySeoBundle;
 use Wexample\SymfonyTesting\Tests\Fixtures\AbstractFixtureKernel;
 use Wexample\SymfonyTranslations\WexampleSymfonyTranslationsBundle;
 use Wexample\SymfonyTunnels\WexampleSymfonyTunnelsBundle;
@@ -22,6 +23,7 @@ class AppKernel extends AbstractFixtureKernel
             new WexampleSymfonyLoaderBundle(),
             new WexampleSymfonyTranslationsBundle(),
             new WexampleSymfonyFormsBundle(),
+            new WexampleSymfonySeoBundle(),
             new WexampleSymfonyTunnelsBundle(),
         ];
     }
@@ -35,6 +37,7 @@ class AppKernel extends AbstractFixtureKernel
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
+        $routes->import('@WexampleSymfonySeoBundle/Resources/config/routes.yaml');
         $routes->import('@WexampleSymfonyTunnelsBundle/Resources/config/routes.yaml');
     }
 }
