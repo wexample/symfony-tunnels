@@ -147,6 +147,8 @@ Each step renders `tunnels/<tunnel>/<step>.html.twig` from the controller's fron
 {%- include '@WexampleSymfonyTunnelsBundle/partials/tunnel-buttons.html.twig' -%}
 ```{% endraw %}
 
+On a last step, `tunnel-timeline.html.twig` lists the way the visitor came, one entry per step; a step says what was done on it by returning a line from `buildSummary()`.
+
 `tunnel_cursor_url(cursor)` gives the URL of any cursor.
 
 ## Application setup

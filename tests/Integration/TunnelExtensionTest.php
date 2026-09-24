@@ -118,4 +118,26 @@ class TunnelExtensionTest extends KernelTestCase
             array_column($extension->tunnelStepper($stepThree)['steps'], 'href')
         );
     }
+
+    public function testTheTimelineListsThePathWalked(): void
+    {
+        $stepOne = $this->tunnel->createEntrypoint();
+        $stepTwo = $stepOne->findFirstNext();
+        $stepThree = $stepTwo->findFirstNextByStep(StepThree::class);
+
+        $stepOne->setComplete();
+        $stepTwo->setComplete();
+
+        $this->assertSame(
+            [
+                'numbered' => true,
+                'items' => [
+                    ['title' => 'Step one', 'state' => 'done'],
+                    ['title' => 'Step two', 'state' => 'done'],
+                    ['title' => 'Step three', 'state' => 'current'],
+                ],
+            ],
+            self::getContainer()->get(TunnelExtension::class)->tunnelTimeline($stepThree)
+        );
+    }
 }

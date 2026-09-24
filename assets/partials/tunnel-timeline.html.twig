@@ -1,0 +1,4 @@
+{#- The path the visitor walked up to the step being displayed, one entry per
+    step with what they did on it. Expects `tunnelCursor`, as every step
+    template gets it. -#}
+{{ component(render_pass, '@WexampleSymfonyDesignSystemBundle/components/timeline', {}, tunnel_timeline(tunnelCursor)) }}

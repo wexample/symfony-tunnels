@@ -329,6 +329,16 @@ abstract class AbstractTunnelStep
     }
 
     /**
+     * What the visitor did on this step, in a line, for the path they walked
+     * to read back: the answer they gave, the option they picked. Nothing by
+     * default, the label of the step telling enough.
+     */
+    public function buildSummary(TunnelCursor $cursor): ?string
+    {
+        return null;
+    }
+
+    /**
      * What the navigation reads where several cursors of this step share a
      * place, the visitor having yet to pick one: their label when they agree,
      * the name of the step when they do not.

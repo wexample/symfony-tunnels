@@ -21,6 +21,7 @@ class TunnelExtension extends AbstractExtension
         return [
             new TwigFunction('tunnel_cursor_url', $this->tunnelCursorUrl(...)),
             new TwigFunction('tunnel_stepper', $this->tunnelStepper(...)),
+            new TwigFunction('tunnel_timeline', $this->tunnelTimeline(...)),
             new TwigFunction('tunnel_previous_url', $this->tunnelPreviousUrl(...)),
             new TwigFunction('tunnel_next_url', $this->tunnelNextUrl(...)),
         ];
@@ -61,6 +62,41 @@ class TunnelExtension extends AbstractExtension
         return [
             'steps' => $steps,
             'current' => $current,
+        ];
+    }
+
+    /**
+     * The options of the design system timeline for the path walked up to the
+     * step being displayed. In a tree the way to a cursor is unique: it is the
+     * line of its ancestors.
+     *
+     * @return array{numbered: bool, items: array<array{title: string, text?: string, state?: string}>}
+     */
+    public function tunnelTimeline(TunnelCursor $cursor): array
+    {
+        $items = [];
+
+        foreach ([...$cursor->getPreviousTrace(), $cursor] as $walked) {
+            $item = [
+                'title' => $walked->step->buildLabel($walked),
+            ];
+
+            if (null !== $summary = $walked->step->buildSummary($walked)) {
+                $item['text'] = $summary;
+            }
+
+            if ($walked === $cursor) {
+                $item['state'] = 'current';
+            } elseif ($walked->isComplete()) {
+                $item['state'] = 'done';
+            }
+
+            $items[] = $item;
+        }
+
+        return [
+            'numbered' => true,
+            'items' => $items,
         ];
     }
 
