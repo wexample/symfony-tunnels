@@ -11,11 +11,6 @@ use Wexample\SymfonyTunnels\Service\TunnelRoutingService;
 
 class TunnelExtension extends AbstractExtension
 {
-    /**
-     * Stands for the steps ahead that depend on the branch the visitor takes.
-     */
-    public const string LABEL_UNKNOWN_STEPS = '…';
-
     public function __construct(
         private readonly TunnelRoutingService $tunnelRoutingService,
     ) {
@@ -42,7 +37,7 @@ class TunnelExtension extends AbstractExtension
      * The options of the design system stepper for the step being displayed:
      * the steps known behind and ahead, a link on those the visitor may reach.
      *
-     * @return array{steps: array<array{label: string, href: ?string}>, current: int}
+     * @return array{steps: array<array{label?: string, href?: ?string, unknown?: bool}>, current: int}
      */
     public function tunnelStepper(TunnelCursor $cursor): array
     {
@@ -92,15 +87,15 @@ class TunnelExtension extends AbstractExtension
     }
 
     /**
-     * @return array{label: string, href: ?string}
+     * A null item stands for the steps ahead that depend on the branch the
+     * visitor takes, which the stepper draws as an unnumbered gap.
+     *
+     * @return array{label?: string, href?: ?string, unknown?: bool}
      */
     private function buildStepperStep(?TunnelNavigationItem $item): array
     {
         if (!$item) {
-            return [
-                'label' => self::LABEL_UNKNOWN_STEPS,
-                'href' => null,
-            ];
+            return ['unknown' => true];
         }
 
         return [
