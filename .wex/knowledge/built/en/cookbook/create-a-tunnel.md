@@ -79,6 +79,19 @@ $tunnelResumeService->resumeByVariable('payment-id', $id, function (?TunnelCurso
 });
 ```
 
+## Session expiration
+
+A session nobody walks expires a day after the last step displayed. The tunnel changes that for all its steps, a step for the time the visitor stands on it — the one holding a room or a stock asks for minutes:
+
+```php
+public function getSessionExpiration(TunnelCursor $cursor): string
+{
+    return '15 minutes';
+}
+```
+
+Expired sessions are dropped every 15 minutes by the scheduler, which calls `onSessionDestroy()` on every step first: that is where a held stock is given back.
+
 ## Manager
 
 ```php
@@ -150,3 +163,13 @@ symfony_tunnels:
 php bin/console doctrine:migrations:diff
 php bin/console doctrine:migrations:migrate
 ```
+
+The purge of expired sessions runs on the scheduler: the application needs a worker consuming its transport, one long-running process — a container of its own under Docker.
+
+```bash
+php bin/console messenger:consume scheduler_default
+```
+
+`bin/console tunnels:purge` runs it by hand.
+
+Crawlers are kept out of `/tunnel/` through the `/robots.txt` of `symfony-seo`, once its routes are imported.

@@ -85,7 +85,7 @@ class TunnelExtensionTest extends KernelTestCase
 
     public function testVariantsNotPickedYetShareTheNameOfTheStep(): void
     {
-        $step = new class extends AbstractTestStep {
+        $step = new class () extends AbstractTestStep {
             public const string STEP_NAME = 'plan';
 
             public function buildLabel(TunnelCursor $cursor): string
