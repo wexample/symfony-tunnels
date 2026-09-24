@@ -147,7 +147,8 @@ class TunnelTreeHelper
                 (string) $key,
                 $linkCursor,
                 $lastCursor,
-                $group['depth']
+                $group['depth'],
+                array_values($distinctCursors)
             );
         }
 

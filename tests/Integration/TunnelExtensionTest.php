@@ -3,7 +3,9 @@
 namespace Wexample\SymfonyTunnels\Tests\Integration;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Wexample\SymfonyTunnels\Class\TunnelCursor;
 use Wexample\SymfonyTunnels\Service\TunnelSessionService;
+use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\Test\AbstractTestStep;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\Test\StepThree;
 use Wexample\SymfonyTunnels\Tests\Fixtures\Tunnel\TestTunnelManagerService;
 use Wexample\SymfonyTunnels\Tests\Traits\DatabaseTestTrait;
@@ -79,5 +81,23 @@ class TunnelExtensionTest extends KernelTestCase
         $this->assertNull(
             self::getContainer()->get(TunnelExtension::class)->tunnelNextUrl($entrypoint)
         );
+    }
+
+    public function testVariantsNotPickedYetShareTheNameOfTheStep(): void
+    {
+        $step = new class extends AbstractTestStep {
+            public const string STEP_NAME = 'plan';
+
+            public function buildLabel(TunnelCursor $cursor): string
+            {
+                return ucfirst($cursor->options['plan']) . ' plan';
+            }
+        };
+
+        $free = new TunnelCursor($step, $this->tunnel, ['plan' => 'free']);
+        $paid = new TunnelCursor($step, $this->tunnel, ['plan' => 'paid']);
+
+        $this->assertSame('Plan', $step->buildGroupLabel([$free, $paid]));
+        $this->assertSame('Free plan', $step->buildGroupLabel([$free]));
     }
 }

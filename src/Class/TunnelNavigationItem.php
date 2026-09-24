@@ -20,6 +20,13 @@ class TunnelNavigationItem
          */
         public readonly TunnelCursor $lastCursor,
         public readonly int $depth,
+        /**
+         * The distinct cursors the remaining paths reach this step through:
+         * several when the visitor has yet to pick a variant of it.
+         *
+         * @var TunnelCursor[]
+         */
+        public readonly array $cursors = [],
     ) {
     }
 }

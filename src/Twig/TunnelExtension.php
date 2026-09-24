@@ -106,7 +106,7 @@ class TunnelExtension extends AbstractExtension
         }
 
         return [
-            'label' => $item->lastCursor->step->buildLabel($item->lastCursor),
+            'label' => $item->lastCursor->step->buildGroupLabel($item->cursors ?: [$item->lastCursor]),
             'href' => $item->linkCursor
                 ? $this->tunnelRoutingService->buildCursorUrl($item->linkCursor)
                 : null,

@@ -320,6 +320,24 @@ abstract class AbstractTunnelStep
         return ucfirst(str_replace('-', ' ', static::getName()));
     }
 
+    /**
+     * What the navigation reads where several cursors of this step share a
+     * place, the visitor having yet to pick one: their label when they agree,
+     * the name of the step when they do not.
+     *
+     * @param TunnelCursor[] $cursors
+     */
+    public function buildGroupLabel(array $cursors): string
+    {
+        $labels = array_unique(
+            array_map(fn (TunnelCursor $cursor): string => $this->buildLabel($cursor), $cursors)
+        );
+
+        return count($labels) === 1
+            ? reset($labels)
+            : ucfirst(str_replace('-', ' ', static::getName()));
+    }
+
     public function getViewFolder(TunnelCursor $cursor): string
     {
         return $cursor->manager::getName();
