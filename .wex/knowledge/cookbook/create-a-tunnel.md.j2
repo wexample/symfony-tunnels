@@ -40,6 +40,45 @@ The hooks worth knowing, all taking the cursor:
 
 Steps keep what they need as variables: `$cursor->setVariableValue()` for this cursor only, `$cursor->manager->setVariableValue()` for the whole session. Going back before a step drops its cursor variables.
 
+## Form steps
+
+A step asking for input extends `AbstractFormTunnelStep` and names a `symfony-forms` processor:
+
+```php
+class ConfirmStep extends AbstractFormTunnelStep
+{
+    public function getFormProcessor(TunnelCursor $cursor): AbstractFormProcessor
+    {
+        return $this->formProcessor;
+    }
+
+    public function buildFormData(TunnelCursor $cursor): mixed
+    {
+        return ['name' => $cursor->getVariableValue('name')];
+    }
+
+    public function onFormValid(FormInterface $form, TunnelCursor $cursor): ?TunnelCursor
+    {
+        $cursor->setVariableValue('name', $form->get('name')->getData());
+
+        return parent::onFormValid($form, $cursor);
+    }
+}
+```
+
+The template receives `form` and renders it with `form_load(render_pass, form, '<form template>')`. A valid submission moves to the next step, inside the modal when the tunnel was opened in one.
+
+## Waiting for an outside event
+
+A step that must wait — for a payment webhook, say — sets `$cursor->manager->setSessionStatus(TunnelSessionStatus::PENDING_ASYNC_ACTION)` and stores the identifier the event will carry, e.g. `$cursor->setVariableValue('payment-id', $id)`. The event handler resumes it:
+
+```php
+$tunnelResumeService->resumeByVariable('payment-id', $id, function (?TunnelCursor $cursor, AbstractTunnelManagerService $tunnel): void {
+    $cursor->setComplete();
+    $tunnel->setSessionComplete();
+});
+```
+
 ## Manager
 
 ```php

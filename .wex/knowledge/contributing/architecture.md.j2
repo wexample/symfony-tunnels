@@ -49,6 +49,16 @@ The values a tunnel is opened with are declared in `getInitVariablesConfig()` (`
 
 `initAsCurrentStep()` is where the rules of the path apply: it records the last cursor displayed, notifies the ancestors, completes a parent waiting for its child (`ON_NEXT_INIT`), and when the step had already sent the visitor down a branch, calls `onPreviousStepLoading()` on it — which by default drops every cursor variable of that branch. Then it applies the step's own strategy from {{ path("src/Enum/TunnelStepCompleteStrategy.php") }}.
 
+### Form steps
+
+{{ path("src/Service/Step/AbstractFormTunnelStep.php") }} is a step showing a form, completed only when the form is (`MANUAL` strategy). It names an ordinary `symfony-forms` processor through `getFormProcessor()`, which does what a valid submission means for the application, and gives the form its starting data through `buildFormData()`. The step itself only says where the tunnel goes next, in `onFormValid()`: by default it marks itself complete and returns the next cursor, while returning null keeps the visitor on the step.
+
+`AbstractTunnelController::handleFormStep()` shows the form on GET. On POST it lets the processor handle the submission, asks the processor whether the form is valid — the same check that decides whether its own `onValid()` runs — and turns the step's answer into the processor's success action: `embed_redirect` to the next cursor when the request comes from a modal, panel or overlay, `redirect` otherwise, `embed_stay` when the step returned null. A JSON request gets the payload of `symfony-forms`' `FormResponsePayloadBuilder`; a page request gets a redirect, or the form again with its errors. The form posts back to the step URL, so its class must not set `$ajax = true`.
+
+### Asynchronous resume
+
+{{ path("src/Service/TunnelResumeService.php") }} takes up a flow left waiting on an outside event — a payment confirmed by a webhook — with no visitor and no URL. The waiting step sets its session to `pending_async_action` and keeps the identifier the event will carry as a variable. The application's event handler calls `resumeByVariable($name, $value, $onCursor)`, which finds every pending session holding that value, rebuilds its tunnel, restores its opening values through `autoInitVariables()`, and hands the cursor the variable belongs to to the callback.
+
 ### Access rules
 
 `AbstractTunnelStep::needsRedirect()` sends the visitor to the direct parent when it is incomplete, unless that parent completes on its child, then to the first incomplete ancestor under the default strategy of {{ path("src/Enum/TunnelStepRedirectStrategy.php") }}.
@@ -65,4 +75,4 @@ The values a tunnel is opened with are declared in `getInitVariablesConfig()` (`
 
 ### Tests
 
-`tests/Fixtures/App` is a kernel on in-memory SQLite with the loader, translations and tunnels bundles. `tests/Fixtures/Tunnel` holds the test tunnel ported from the legacy code, the executable specification of the engine: step two appears three times with different options, step three bis three times as named variants, and the steps exercise every completion strategy, internal and external redirects, a direct-access veto and a branch reset. `tests/Unit` runs it on the in-memory storage; `tests/Integration` runs it on the database and over HTTP.
+`tests/Fixtures/App` is a kernel on in-memory SQLite with the loader, translations, forms and tunnels bundles. `tests/Fixtures/Tunnel` holds the test tunnel ported from the legacy code, the executable specification of the engine: step two appears three times with different options, step three bis three times as named variants, and the steps exercise every completion strategy, internal and external redirects, a direct-access veto and a branch reset. A second, two-step tunnel in `tests/Fixtures/Tunnel/FormTunnel` covers form steps. `tests/Unit` runs the engine on the in-memory storage; `tests/Integration` runs it on the database and over HTTP.
