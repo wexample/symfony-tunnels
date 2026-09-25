@@ -227,10 +227,22 @@ class TunnelSessionService implements TunnelSessionStorageInterface
 
             if ($session
                 && $session->getTunnel() === $tunnelName
-                && $session->getUserIdentifier() === $userIdentifier
                 && ! $session->isExpired()
             ) {
-                return $session;
+                if ($session->getUserIdentifier() === $userIdentifier) {
+                    return $session;
+                }
+
+                // Signing in halfway — a login step — keeps the flow walked so
+                // far: this browser started it, the account it signed into takes
+                // it on. Never the other way round, nor from one account to
+                // another, nor through a hash, which can travel.
+                if ($session->getUserIdentifier() === null && $userIdentifier !== null) {
+                    $session->setUserIdentifier($userIdentifier);
+                    $this->tunnelSessionRepository->save($session);
+
+                    return $session;
+                }
             }
         }
 

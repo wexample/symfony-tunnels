@@ -132,6 +132,42 @@ class TunnelSessionServiceTest extends KernelTestCase
         );
     }
 
+    public function testTheBrowserSessionIsTakenOnByTheAccountSigningIn(): void
+    {
+        $anonymous = $this->sessionService->findOrCreateSession(self::TUNNEL_NAME);
+
+        $adopted = $this->sessionService->findOrCreateSession(
+            self::TUNNEL_NAME,
+            browserSessionId: (string) $anonymous->getId(),
+            userIdentifier: 'alice@example.com'
+        );
+        $this->assertSame($anonymous->getId(), $adopted->getId());
+        $this->assertSame('alice@example.com', $adopted->getUserIdentifier());
+
+        // Signed out again: the flow stays with the account.
+        $this->assertNotSame(
+            $anonymous->getId(),
+            $this->sessionService->findOrCreateSession(
+                self::TUNNEL_NAME,
+                browserSessionId: (string) $anonymous->getId()
+            )->getId()
+        );
+    }
+
+    public function testAnAnonymousSessionIsNotTakenOnThroughAHash(): void
+    {
+        $anonymous = $this->sessionService->findOrCreateSession(self::TUNNEL_NAME);
+
+        $this->assertNotSame(
+            $anonymous->getId(),
+            $this->sessionService->findOrCreateSession(
+                self::TUNNEL_NAME,
+                resumeHash: $anonymous->getHash(),
+                userIdentifier: 'alice@example.com'
+            )->getId()
+        );
+    }
+
     public function testResumingByHashChecksTheTunnelAndTheUser(): void
     {
         $session = $this->sessionService->findOrCreateSession(
