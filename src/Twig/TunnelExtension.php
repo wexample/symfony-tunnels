@@ -7,12 +7,14 @@ use Twig\TwigFunction;
 use Wexample\SymfonyTunnels\Class\TunnelCursor;
 use Wexample\SymfonyTunnels\Class\TunnelNavigationItem;
 use Wexample\SymfonyTunnels\Helper\TunnelTreeHelper;
+use Wexample\SymfonyTunnels\Service\TunnelRegistry;
 use Wexample\SymfonyTunnels\Service\TunnelRoutingService;
 
 class TunnelExtension extends AbstractExtension
 {
     public function __construct(
         private readonly TunnelRoutingService $tunnelRoutingService,
+        private readonly TunnelRegistry $tunnelRegistry,
     ) {
     }
 
@@ -20,6 +22,7 @@ class TunnelExtension extends AbstractExtension
     {
         return [
             new TwigFunction('tunnel_cursor_url', $this->tunnelCursorUrl(...)),
+            new TwigFunction('tunnel_entrypoint_url', $this->tunnelEntrypointUrl(...)),
             new TwigFunction('tunnel_stepper', $this->tunnelStepper(...)),
             new TwigFunction('tunnel_timeline', $this->tunnelTimeline(...)),
             new TwigFunction('tunnel_previous_url', $this->tunnelPreviousUrl(...)),
@@ -32,6 +35,21 @@ class TunnelExtension extends AbstractExtension
         array $params = [],
     ): string {
         return $this->tunnelRoutingService->buildCursorUrl($cursor, $params);
+    }
+
+    /**
+     * Where a link into a tunnel points from outside of it: its first step,
+     * the tunnel sending the visitor on from there if they have walked it
+     * further.
+     *
+     * @param string $nameOrClass the tunnel name, or its manager class
+     */
+    public function tunnelEntrypointUrl(string $nameOrClass): string
+    {
+        $tunnel = $this->tunnelRegistry->getTunnel($nameOrClass)
+            ?? throw new \InvalidArgumentException(sprintf('No tunnel is named "%s".', $nameOrClass));
+
+        return $this->tunnelRoutingService->buildCursorUrl($tunnel->createEntrypoint());
     }
 
     /**

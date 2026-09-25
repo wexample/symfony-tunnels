@@ -140,4 +140,12 @@ class TunnelExtensionTest extends KernelTestCase
             self::getContainer()->get(TunnelExtension::class)->tunnelTimeline($stepThree)
         );
     }
+
+    public function testALinkIntoATunnelPointsAtItsFirstStep(): void
+    {
+        $this->assertSame(
+            '/tunnel/test-tunnel/with/prefix/step-one',
+            self::getContainer()->get(TunnelExtension::class)->tunnelEntrypointUrl('test')
+        );
+    }
 }
