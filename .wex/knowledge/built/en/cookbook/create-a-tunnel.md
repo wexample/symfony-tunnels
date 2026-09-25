@@ -66,7 +66,7 @@ class ConfirmStep extends AbstractFormTunnelStep
 }
 ```
 
-The template receives `form` and renders it with `form_load(render_pass, form, '<form template>')`. A valid submission moves to the next step, inside the modal when the tunnel was opened in one.
+The template receives `form` and renders it with `form_load(render_pass, form, '<form template>')`. The form type adds no submit button: `tunnel-buttons.html.twig` renders the next button of a form step as its submit, pointing at the form tag from outside through the HTML `form` attribute, so the way on stays in the same place on every step. It reads « Next »; a step asking for a payment says so by returning another translation key from `buildSubmitLabel()`. A valid submission moves to the next step, inside the modal when the tunnel was opened in one.
 
 ## Waiting for an outside event
 
@@ -120,15 +120,18 @@ Declaring it as a service is enough: it is tagged and found by `TunnelRegistry`.
 
 ## Controller
 
+A tunnel is mounted in the pages it belongs to: its controller carries the class-level `#[Route]` of those pages, and the tunnel follows their URL, their route names, their menu and their breadcrumb.
+
 ```php
-final class DemoTunnelController extends AbstractTunnelController
+#[Route(path: 'tunnels/plan/', name: 'tunnels_plan_')]
+final class PlanTunnelController extends AbstractTunnelController
 {
     public static function getTunnelManagerClass(): string
     {
         return DemoTunnelManagerService::class;
     }
 
-    #[TunnelRoute]
+    #[TunnelRoute(cursorPlaceholder: '{step}')]
     public function index(Request $request): Response
     {
         return $this->handleTunnelRequest($request);
@@ -136,7 +139,7 @@ final class DemoTunnelController extends AbstractTunnelController
 }
 ```
 
-This gives the route `tunnel_demo_index` on `/tunnel/demo-tunnel/{step?}`. `#[TunnelRoute]` also takes a `name`, a `pathPrefix` and a `pathSuffix`.
+This gives the route `tunnels_plan_index` on `/tunnels/plan/{step}`: the steps stand below the page `/tunnels/plan`. Each step is given its label as `page_title`, which the layout titles the page with and the breadcrumb ends on. A controller without a class-level `#[Route]` gets `tunnel_<tunnel>_index` on `/tunnel/<controller>/{step?}` instead. `#[TunnelRoute]` also takes a `name`, a `pathPrefix` and a `pathSuffix`.
 
 ## Templates
 
@@ -146,6 +149,8 @@ Each step renders `tunnels/<tunnel>/<step>.html.twig` from the controller's fron
 {%- include '@WexampleSymfonyTunnelsBundle/partials/tunnel-navigation.html.twig' -%}
 {%- include '@WexampleSymfonyTunnelsBundle/partials/tunnel-buttons.html.twig' -%}
 ```
+
+On a last step, `tunnel-timeline.html.twig` lists the way the visitor came, one entry per step; a step says what was done on it by returning a line from `buildSummary()`.
 
 `tunnel_cursor_url(cursor)` gives the URL of any cursor.
 
@@ -172,4 +177,4 @@ php bin/console messenger:consume scheduler_default
 
 `bin/console tunnels:purge` runs it by hand.
 
-Crawlers are kept out of `/tunnel/` through the `/robots.txt` of `symfony-seo`, once its routes are imported.
+Crawlers are kept out of the tunnels through the `/robots.txt` of `symfony-seo`, once its routes are imported: every tunnel route is disallowed by the fixed start of its path, wherever it is mounted.

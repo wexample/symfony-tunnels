@@ -34,9 +34,9 @@ The values a tunnel is opened with are declared in `getInitVariablesConfig()` (`
 
 ### Routing
 
-src/Attribute/TunnelRoute.php marks a controller action as a tunnel entry point. src/Routing/TunnelRouteLoader.php, a `tunnel_routes` loader built on `symfony-helpers`' `AbstractRouteLoader`, turns each one into a route named `tunnel_<tunnel>_<name>` on `/tunnel/<controller>/<name>/<prefix>/{step?}/<suffix>`, the name being left out for `index`. The application imports it with src/Resources/config/routes.yaml.
+src/Attribute/TunnelRoute.php marks a controller action as a tunnel entry point. src/Routing/TunnelRouteLoader.php, a `tunnel_routes` loader built on `symfony-helpers`' `AbstractRouteLoader`, turns each one into a route; where it lives and how it is named is src/Helper/TunnelRouteHelper.php's call. A controller carrying a class-level `#[Route]` mounts the tunnel inside its pages: the route is named `<class name prefix><name>` on `<class path>/<name>/<prefix>/{step?}/<suffix>`, so URLs, route names, the menu and the breadcrumb read the same tree as the pages around it. Without one, the route stands apart, named `tunnel_<tunnel>_<name>` on `/tunnel/<controller>/…`. The name is left out of the path for `index`. The application imports the loader with src/Resources/config/routes.yaml.
 
-src/Service/TunnelRoutingService.php builds the URL of a cursor: the tunnel route, the route params of the manager and the step (`step=<name>` by default), and the options under `cursor-options` when the cursor has some.
+src/Service/TunnelRoutingService.php builds the URL of a cursor: the tunnel route — of the controller the request walks it through, when several mount the same tunnel — the route params of the manager and the step (`step=<name>` by default), and the options under `cursor-options` when the cursor has some.
 
 ### Request
 
@@ -71,7 +71,7 @@ src/Service/TunnelResumeService.php takes up a flow left waiting on an outside e
 
 src/Helper/TunnelTreeHelper.php reads a built tree: its root-to-leaf paths, its map of sections (one row per step and options, in an order every path agrees with), and the known steps around a cursor — the step groups every remaining path goes through, with a null where paths diverge. src/Class/TunnelNavigationItem.php and src/Class/TunnelTreeSection.php carry the results.
 
-src/Twig/TunnelExtension.php exposes `tunnel_cursor_url`, `tunnel_stepper` — the options of the design system stepper, a divergence becoming an `unknown` step, and a step every path goes through under several variants being labelled by `buildGroupLabel()` until one is picked — and `tunnel_previous_url` / `tunnel_next_url`. The partials assets/partials/tunnel-navigation.html.twig and assets/partials/tunnel-buttons.html.twig use them.
+src/Twig/TunnelExtension.php exposes `tunnel_cursor_url`, `tunnel_entrypoint_url` — the first step of a tunnel, for a link into it from outside —, `tunnel_stepper` — the options of the design system stepper, a divergence becoming an `unknown` step, and a step every path goes through under several variants being labelled by `buildGroupLabel()` until one is picked — `tunnel_timeline` — the options of the design system timeline for the path walked, the ancestors of the cursor, each step adding what was done on it through `buildSummary()` — and `tunnel_previous_url` / `tunnel_next_url`. The partials assets/partials/tunnel-navigation.html.twig, assets/partials/tunnel-timeline.html.twig and assets/partials/tunnel-buttons.html.twig use them.
 
 src/Service/TunnelTracingService.php draws the tree and the map as text for src/Command/InfoCommand.php, `tunnels:info <name>`.
 
