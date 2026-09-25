@@ -1,4 +1,9 @@
 {#- The steps of the tunnel around the one being displayed, and the way back
     and forth. Expects `tunnelCursor`, as every step template gets it. -#}
-{%- set stepper = tunnel_stepper(tunnelCursor) -%}
+{#- Read by where the step is shown unless the caller says: dots under the
+    header of a modal or a panel, where a line of words would crowd it, compact
+    in an embed, the full stepper on a page of its own. -#}
+{%- set base = render_pass.layoutBase|default(null) -%}
+{%- set stepper_variant = stepper_variant ?? (base in ['modal', 'panel'] ? 'dots' : (base == 'embed' ? 'compact' : null)) -%}
+{%- set stepper = tunnel_stepper(tunnelCursor)|merge({ variant: stepper_variant }) -%}
 {{ component(render_pass, '@WexampleSymfonyDesignSystemBundle/components/stepper', {}, stepper) }}

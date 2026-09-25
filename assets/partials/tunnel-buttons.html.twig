@@ -11,7 +11,10 @@
 {%- if previousUrl or nextUrl or form is defined -%}
     <div class="tunnel-buttons--previous">
         {%- if previousUrl -%}
-            {{ button_link('ph:bold/arrow-left', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.previous'|trans, previousUrl) }}
+            {#- Going back: a page sliding as it changes slides the other way. -#}
+            {{ button_link('ph:bold/arrow-left', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.previous'|trans, previousUrl, {
+                attr: { 'data-page-direction': 'back' },
+            }) }}
         {%- endif -%}
     </div>
     <div class="tunnel-buttons--next">
