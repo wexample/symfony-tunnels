@@ -25,6 +25,15 @@ abstract class AbstractFormTunnelStep extends AbstractTunnelStep
     }
 
     /**
+     * The translation key of the next button, which submits the form: a step
+     * asking for a payment says so on it.
+     */
+    public function buildSubmitLabel(TunnelCursor $cursor): string
+    {
+        return 'WexampleSymfonyTunnelsBundle.common.tunnel::button.next';
+    }
+
+    /**
      * The data the form starts from.
      */
     public function buildFormData(TunnelCursor $cursor): mixed

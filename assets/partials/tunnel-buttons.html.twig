@@ -16,7 +16,7 @@
     </div>
     <div class="tunnel-buttons--next">
         {%- if form is defined -%}
-            {{ button('ph:bold/arrow-right', 'WexampleSymfonyTunnelsBundle.common.tunnel::button.next'|trans, {
+            {{ button('ph:bold/arrow-right', tunnelStep.buildSubmitLabel(tunnelCursor)|trans, {
                 type: 'submit',
                 form: form.vars.attr.id,
                 class: 'button--invert',
