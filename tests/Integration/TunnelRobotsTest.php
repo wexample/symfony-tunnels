@@ -12,9 +12,11 @@ class TunnelRobotsTest extends WebTestCase
         $client->request('GET', '/robots.txt');
 
         $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString(
-            'Disallow: /tunnel/',
-            $client->getResponse()->getContent()
-        );
+        $content = $client->getResponse()->getContent();
+
+        // Each tunnel route by the fixed start of its path, wherever it is mounted.
+        $this->assertStringContainsString('Disallow: /tunnel/test-tunnel/with/prefix/', $content);
+        $this->assertStringContainsString('Disallow: /tunnel/form-tunnel/', $content);
+        $this->assertStringContainsString('Disallow: /pages/form/', $content);
     }
 }

@@ -34,9 +34,9 @@ The values a tunnel is opened with are declared in `getInitVariablesConfig()` (`
 
 ### Routing
 
-{{ path("src/Attribute/TunnelRoute.php") }} marks a controller action as a tunnel entry point. {{ path("src/Routing/TunnelRouteLoader.php") }}, a `tunnel_routes` loader built on `symfony-helpers`' `AbstractRouteLoader`, turns each one into a route named `tunnel_<tunnel>_<name>` on `/tunnel/<controller>/<name>/<prefix>/{step?}/<suffix>`, the name being left out for `index`. The application imports it with {{ path("src/Resources/config/routes.yaml") }}.
+{{ path("src/Attribute/TunnelRoute.php") }} marks a controller action as a tunnel entry point. {{ path("src/Routing/TunnelRouteLoader.php") }}, a `tunnel_routes` loader built on `symfony-helpers`' `AbstractRouteLoader`, turns each one into a route; where it lives and how it is named is {{ path("src/Helper/TunnelRouteHelper.php") }}'s call. A controller carrying a class-level `#[Route]` mounts the tunnel inside its pages: the route is named `<class name prefix><name>` on `<class path>/<name>/<prefix>/{step?}/<suffix>`, so URLs, route names, the menu and the breadcrumb read the same tree as the pages around it. Without one, the route stands apart, named `tunnel_<tunnel>_<name>` on `/tunnel/<controller>/…`. The name is left out of the path for `index`. The application imports the loader with {{ path("src/Resources/config/routes.yaml") }}.
 
-{{ path("src/Service/TunnelRoutingService.php") }} builds the URL of a cursor: the tunnel route, the route params of the manager and the step (`step=<name>` by default), and the options under `cursor-options` when the cursor has some.
+{{ path("src/Service/TunnelRoutingService.php") }} builds the URL of a cursor: the tunnel route — of the controller the request walks it through, when several mount the same tunnel — the route params of the manager and the step (`step=<name>` by default), and the options under `cursor-options` when the cursor has some.
 
 ### Request
 

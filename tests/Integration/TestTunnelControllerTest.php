@@ -33,6 +33,13 @@ class TestTunnelControllerTest extends WebTestCase
         $this->assertResponseRedirects(self::BASE_PATH . '/step-one');
     }
 
+    public function testTheStepTitlesThePage(): void
+    {
+        $this->client->request('GET', self::BASE_PATH . '/step-one');
+
+        $this->assertStringContainsString('[[TITLE:Step one]]', $this->client->getResponse()->getContent());
+    }
+
     public function testAnUnknownStepIsNotFound(): void
     {
         $this->client->request('GET', self::BASE_PATH . '/no-such-step');

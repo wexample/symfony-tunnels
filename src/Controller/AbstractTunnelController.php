@@ -206,12 +206,18 @@ abstract class AbstractTunnelController extends AbstractPagesController
         ]);
     }
 
+    /**
+     * `page_title` is the step's label: what the layout titles the page with,
+     * and the last link of the breadcrumb, the steps before being the pages the
+     * tunnel is mounted in. A step or a template can still say otherwise.
+     */
     protected function buildTunnelStepViewParams(TunnelCursor $cursor): array
     {
         return [
                 'tunnel' => $cursor->manager,
                 'tunnelStep' => $cursor->step,
                 'tunnelCursor' => $cursor,
+                'page_title' => $cursor->step->buildLabel($cursor),
             ]
             + $cursor->manager->buildViewParams($cursor)
             + $cursor->step->buildViewParams($cursor);

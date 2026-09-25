@@ -78,4 +78,14 @@ class FormTunnelControllerTest extends WebTestCase
         $this->assertSame(AbstractFormProcessor::ACTION_EMBED_REDIRECT, $payload['action']['type']);
         $this->assertSame(self::BASE_PATH . '/thanks?__layout=modal', $payload['action']['url']);
     }
+
+    public function testATunnelMountedTwiceStaysInTheMountItIsWalkedThrough(): void
+    {
+        $this->client->request('GET', '/pages/form/name');
+        $this->assertResponseIsSuccessful();
+
+        $this->client->request('POST', '/pages/form/name', ['tunnel_test_form' => ['name' => 'Ada']]);
+
+        $this->assertResponseRedirects('/pages/form/thanks');
+    }
 }

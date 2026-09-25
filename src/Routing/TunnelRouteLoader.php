@@ -6,22 +6,19 @@ use ReflectionClass;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
-use Wexample\Helpers\Helper\ClassHelper;
-use Wexample\Helpers\Helper\TextHelper;
 use Wexample\SymfonyHelpers\Routing\AbstractRouteLoader;
 use Wexample\SymfonyTunnels\Attribute\TunnelRoute;
 use Wexample\SymfonyTunnels\Controller\AbstractTunnelController;
-use Wexample\SymfonyTunnels\Service\TunnelRoutingService;
+use Wexample\SymfonyTunnels\Helper\TunnelRouteHelper;
 
 /**
  * Turns every #[TunnelRoute] of every tunnel controller into a route, without
- * the application listing its controllers anywhere.
+ * the application listing its controllers anywhere. Where each route lives and
+ * how it is named is TunnelRouteHelper's call.
  */
 class TunnelRouteLoader extends AbstractRouteLoader
 {
     public const string PARAMETER_CONTROLLERS = 'wexample_symfony_tunnels.controllers';
-
-    public const string PATH_PREFIX = 'tunnel';
 
     /**
      * @param array<class-string<AbstractTunnelController>> $controllerClasses
@@ -46,22 +43,15 @@ class TunnelRouteLoader extends AbstractRouteLoader
         $routes = new RouteCollection();
 
         foreach ($this->controllerClasses as $controllerClass) {
-            $controllerPathPart = TextHelper::toKebab(
-                TextHelper::removeSuffix(ClassHelper::getShortName($controllerClass), 'Controller')
-            );
-
             foreach ((new ReflectionClass($controllerClass))->getMethods() as $method) {
                 foreach ($method->getAttributes(TunnelRoute::class) as $attribute) {
                     /** @var TunnelRoute $tunnelRoute */
                     $tunnelRoute = $attribute->newInstance();
 
                     $routes->add(
-                        TunnelRoutingService::buildTunnelRouteName(
-                            $controllerClass::getTunnelManagerClass(),
-                            $tunnelRoute->name
-                        ),
+                        TunnelRouteHelper::buildRouteName($controllerClass, $tunnelRoute->name),
                         new Route(
-                            $this->buildPath($controllerPathPart, $tunnelRoute),
+                            TunnelRouteHelper::buildPath($controllerClass, $tunnelRoute),
                             ['_controller' => $controllerClass . '::' . $method->getName()]
                         )
                     );
@@ -70,21 +60,5 @@ class TunnelRouteLoader extends AbstractRouteLoader
         }
 
         return $routes;
-    }
-
-    private function buildPath(
-        string $controllerPathPart,
-        TunnelRoute $tunnelRoute,
-    ): string {
-        $parts = [
-            self::PATH_PREFIX,
-            $controllerPathPart,
-            $tunnelRoute->name === TunnelRoute::NAME_INDEX ? null : $tunnelRoute->name,
-            $tunnelRoute->pathPrefix,
-            $tunnelRoute->cursorPlaceholder,
-            $tunnelRoute->pathSuffix,
-        ];
-
-        return '/' . implode('/', array_filter($parts));
     }
 }
