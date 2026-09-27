@@ -23,7 +23,7 @@ php-helpers ─ php-date ─ php-file ─ php-html ─ php-pseudocode
         └─ symfony-loader ─ symfony-routing ─ symfony-template
              └─ symfony-design-system
                   └─ symfony-forms, symfony-api, and the business packages
-                     (accounting, cart, money, stripe, user, geo, content, …)
+                     (accounting, cart, money, payment-stripe, user, geo, content, …)
 ```
 
 The suite is globally mature — `symfony-helpers` (162 php files), `symfony-loader` (85),
