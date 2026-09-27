@@ -1,7 +1,7 @@
 # Common ground for any agent extracting a package into the PHP suite
 
 Opened: 2026-09-24
-Updated: 2026-09-24
+Updated: 2026-09-27
 
 This file holds what every extraction todo would otherwise repeat: where you stand, the
 conventions the mature packages already follow, and the way of working expected of you. A
@@ -49,6 +49,18 @@ Run `wex ai::design/rules --formatter php-code` (and `--formatter javascript-cod
 touch `assets/`) before deciding on any file layout — it is the authority, this section is
 the summary.
 
+- Package names follow `symfony-<parent>-<extension>`: a package that extends another starts
+  with its parent's name, so each subject forms one block in a directory listing. At most
+  one extension suffix. Known extensions:
+  - `-ds`: screens built on `symfony-design-system` (`symfony-data-sync-ds`), so the parent
+    stays free of that dependency;
+  - `-demo`: demo pages installed by the showcase app (§6);
+  - `-testing`: test fixtures and helpers (`symfony-loader-testing`);
+  - `symfony-remote-<service>`: a client for one external service, built on `symfony-remote`
+    (itself the Symfony integration of `php-api`) — `symfony-remote-rocket-chat`.
+
+  No `bridge-`, `ds-` or `demo-` prefix. Typologies are listed with a glob
+  (`ls -d *-ds`).
 - PSR-4 `Wexample\SymfonyXxx\` → `src/`, one class per file, file name = class name.
 - Kinds live in their own directory under `src/`: `Class/`, `Helper/`, `Traits/`,
   `Interface/`, `Enum/`. A trait next to the class that uses it is the case to move.
