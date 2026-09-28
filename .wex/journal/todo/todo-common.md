@@ -13,8 +13,8 @@ Paths below are written relative to the PHP suite root — `PACKAGES/PHP/package
 
 ## 1. Where you stand
 
-Around 45 packages, two families: `php-*` (framework-free: helpers, api, date, file, html,
-yaml, pseudocode) and `symfony-*` (bundles). They are not peers — there is a spine, and it
+Around 45 packages, two families: `php-*` (framework-free: helpers, api, api-entity, date,
+file, html, yaml, pseudocode) and `symfony-*` (bundles). They are not peers — there is a spine, and it
 runs in this order:
 
 ```
@@ -111,8 +111,8 @@ with the paths pointed at the package symlinked in its `vendor/`:
 PKG=vendor/wexample/symfony-xxx
 php bin/console pseudocode:generate:pseudocode $PKG/pseudocode $PKG/src -r
 php bin/console api:export:entities --source=$PKG/pseudocode/entity --output=$PKG/assets/data/entity
-node node_modules/@wexample/js-api/bin/generate-entities.mjs     --data-dir=$PKG/assets/data/entity --output-dir=$PKG/assets
-node node_modules/@wexample/js-api/bin/generate-repositories.mjs --data-dir=$PKG/assets/data/entity --output-dir=$PKG/assets
+node node_modules/@wexample/js-api-entity/bin/generate-entities.mjs     --data-dir=$PKG/assets/data/entity --output-dir=$PKG/assets
+node node_modules/@wexample/js-api-entity/bin/generate-repositories.mjs --data-dir=$PKG/assets/data/entity --output-dir=$PKG/assets
 ```
 
 Resulting layout, again `symfony-money`: `assets/data/entity/<entity>.json`,
