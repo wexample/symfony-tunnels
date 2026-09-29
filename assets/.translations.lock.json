@@ -1,0 +1,152 @@
+{
+    "common/tunnel.ar.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.bn.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.de.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.es.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.fa.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.fi.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.he.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.hi.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.ja.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.ko.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.pl.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.ru.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.th.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.ur.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    },
+    "common/tunnel.zh.yml": {
+        "button.next": {
+            "hash": "81e7e19c1094d0fec66b82b44d15dfef",
+            "engine": "syrtis"
+        },
+        "button.previous": {
+            "hash": "a2e36b218ab1d38cf5ed4f518ecf3173",
+            "engine": "syrtis"
+        }
+    }
+}
