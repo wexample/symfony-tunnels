@@ -147,15 +147,19 @@ abstract class AbstractTunnelController extends AbstractPagesController
         $data = $step->buildFormData($cursor);
 
         if (! $request->isMethod(Request::METHOD_POST)) {
-            return $this->renderFormStep($cursor, $processor->createForm($data));
+            // Back to the step, whatever the form's own habit: an ajax form
+            // posts to the forms' generic route, where no tunnel would hear it.
+            return $this->renderFormStep($cursor, $processor->createForm($data, ['action' => $request->getRequestUri()]));
         }
 
         $form = $processor->handleSubmissionWithData($request, $data);
         $next = null;
 
-        // The processor has the last word on validity, as it does when it
-        // decides whether to call its own onValid().
-        if ($form->isSubmitted() && $processor->formIsValid($form)) {
+        // The processor has had the last word on validity while handling the
+        // submission: what it refused, it wrote on the form as an error. Asked
+        // again, a check with an effect — a code consumed, an app turned on —
+        // would refuse what it has just accepted.
+        if ($form->isSubmitted() && $form->isValid()) {
             $next = $step->onFormValid($form, $cursor);
             $this->setFormSuccessAction($processor, $next, $request);
         }
