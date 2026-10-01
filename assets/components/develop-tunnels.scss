@@ -37,11 +37,11 @@
 
   &.is-complete {
     opacity: 1;
-    color: var(--color-warning, #d4a017);
+    color: var(--warning-11);
   }
 
   &.is-current {
     opacity: 1;
-    color: var(--color-primary, #2f6fed);
+    color: var(--accent-9, #2f6fed);
   }
 }
