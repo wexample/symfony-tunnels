@@ -12,6 +12,7 @@ use Wexample\SymfonyForms\Service\FormProcessor\FormResponsePayloadBuilder;
 use Wexample\SymfonyHelpers\Helper\RequestHelper;
 use Wexample\SymfonyLoader\Controller\AbstractPagesController;
 use Wexample\SymfonyLoader\Helper\AdaptiveRequestHelper;
+use Wexample\SymfonyLoader\Rendering\RenderPass;
 use Wexample\SymfonyLoader\Service\AdaptiveRendererService;
 use Wexample\SymfonyLoader\Service\PageService;
 use Wexample\SymfonyTunnels\Class\TunnelCursor;
@@ -330,7 +331,11 @@ abstract class AbstractTunnelController extends AbstractPagesController
     ): string {
         $params = [];
 
-        if ($layout = $request->query->get(self::QUERY_STRING_LAYOUT)) {
+        // Kept inside the modal or panel the tunnel runs in. A page says it is
+        // one too, which is nothing to carry on to the next step's address.
+        $layout = $request->query->get(self::QUERY_STRING_LAYOUT);
+
+        if ($layout && ! in_array($layout, [RenderPass::BASE_PAGE, RenderPass::BASE_DEFAULT], true)) {
             $params[self::QUERY_STRING_LAYOUT] = $layout;
         }
 
