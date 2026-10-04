@@ -127,10 +127,17 @@ abstract class AbstractTunnelController extends AbstractPagesController
         TunnelCursor $cursor,
         array $parameters = [],
     ): Response {
-        return $this->adaptiveRender(
+        $response = $this->adaptiveRender(
             $this->buildTemplatePath($cursor->step->buildStepView($cursor)),
             $parameters + $this->buildTunnelStepViewParams($cursor)
         );
+
+        // Never shown again from the browser's memory: going back asks the
+        // server, which sends the visitor to where the tunnel stands — a step
+        // done is not to be filled in twice.
+        $response->headers->set('Cache-Control', 'no-store, private');
+
+        return $response;
     }
 
     /**
@@ -321,8 +328,25 @@ abstract class AbstractTunnelController extends AbstractPagesController
     private function redirectToCursor(
         TunnelCursor $cursor,
         Request $request,
-    ): RedirectResponse {
-        return $this->redirect($this->buildCursorRedirectUrl($cursor, $request));
+    ): Response {
+        $url = $this->buildCursorRedirectUrl($cursor, $request);
+
+        // A form sent by script from a step already past — another tab — is
+        // told where to go, in words its script reads, rather than handed the
+        // page it would take for an answer.
+        if ($request->isMethod(Request::METHOD_POST) && RequestHelper::isJsonRequest($request)) {
+            return new JsonResponse([
+                'ok' => true,
+                'action' => [
+                    'type' => AdaptiveRequestHelper::isEmbedded($request)
+                        ? AbstractFormProcessor::ACTION_EMBED_REDIRECT
+                        : AbstractFormProcessor::ACTION_REDIRECT,
+                    'url' => $url,
+                ],
+            ]);
+        }
+
+        return $this->redirect($url);
     }
 
     private function buildCursorRedirectUrl(
