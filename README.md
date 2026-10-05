@@ -1,6 +1,6 @@
 # symfony_tunnels
 
-Version: 10.0.1
+Version: 10.0.2
 
 `symfony-tunnels` is a Symfony bundle for multi-step flows — "tunnels" — that branch. A tunnel is declared as a tree of steps: each step lists what may follow it, the same step can appear on several branches with different options, and every position in that tree is a cursor with a stable hash. The engine keeps the visitor's progress in the database (`TunnelSession`, `TunnelSessionVariable`), decides from the URL, the query options and the path already walked which cursor a request is about, sends the visitor back when an earlier step is unfinished, and drops what an abandoned branch had stored when they go back and take another one. Controllers only declare their entry point with `#[TunnelRoute]`; rendering goes through `symfony-loader`, and the navigation feeds the design system stepper. It targets checkout, onboarding or questionnaire flows whose next step depends on earlier answers.
 
@@ -109,10 +109,10 @@ Visit the [Wexample Suite documentation](https://docs.wexample.com) for the comp
 
 - php: >=8.5
 - doctrine/orm: ^3.0
-- wexample/symfony-helpers: >=14.0.0
+- wexample/symfony-helpers: >=15.0.0
 - wexample/symfony-forms: >=10.0.0
-- wexample/symfony-translations: >=8.0.0
-- wexample/php-pseudocode: >=1.0.0
+- wexample/symfony-translations: >=9.0.0
+- wexample/php-pseudocode: >=2.2.0
 - wexample/symfony-pseudocode: >=3.0.0
 - wexample/symfony-seo: >=5.0.0
 - symfony/form: ^7.4
