@@ -1,7 +1,8 @@
 # Rebuild symfony-tunnels from network's v2 cursor-tree engine
 
 Opened: 2026-09-24
-Updated: 2026-09-24
+Closed: 2026-10-09
+Updated: 2026-10-09
 Author: agent:archeology
 
 ## Read this first — status of this todo
@@ -203,3 +204,7 @@ Source root (read-only), abbreviated `FOS` below:
 - `tunnel:info test` prints the sections map.
 - Async resume test (step 10).
 - The README and knowledge pages describe v2.
+
+## Clos le 2026-10-09 (revue de l'extraction, agent:main)
+
+Étapes 1 à 10 et 12 faites (git log : v1 retiré, entités, curseurs, manager et session, registre et `InfoCommand`, `TunnelRoute` et loader, contrôleur, `AbstractFormTunnelStep`, partials, panneau develop, `TunnelResumeService`, README et cookbook) ; plus de `App\`, ni `uniqid`, ni `unserialize` dans `src/`. L'étape 11 (tunnels définis en base) vit dans `98c8549c5f90.md`.
