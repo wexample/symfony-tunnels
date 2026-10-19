@@ -13,6 +13,7 @@ use Wexample\SymfonyTunnels\Exception\TunnelCycleException;
 use Wexample\SymfonyTunnels\Exception\TunnelInitVariableException;
 use Wexample\SymfonyTunnels\Interface\TunnelSessionStorageInterface;
 use Wexample\SymfonyTunnels\Service\Step\AbstractTunnelStep;
+use Symfony\Contracts\Service\ResetInterface;
 
 /**
  * One tunnel: its tree of cursors, the session being walked, and what that
@@ -21,7 +22,7 @@ use Wexample\SymfonyTunnels\Service\Step\AbstractTunnelStep;
  * A manager carries the state of the flow in progress, which is why there is one
  * per tunnel rather than one for all of them, and why steps carry none.
  */
-abstract class AbstractTunnelManagerService
+abstract class AbstractTunnelManagerService implements ResetInterface
 {
     /**
      * @var array<string, TunnelCursor>
@@ -49,6 +50,20 @@ abstract class AbstractTunnelManagerService
     public function __construct(
         protected readonly TunnelSessionStorageInterface $sessionStorage,
     ) {
+    }
+
+    /**
+     * A tunnel's session is a visitor's: a worker serving the next request
+     * must find none until that request selects its own.
+     */
+    public function reset(): void
+    {
+        $this->cursors = [];
+        $this->steps = [];
+        $this->entrypointCursor = null;
+        $this->currentCursor = null;
+        $this->session = null;
+        $this->initVariables = [];
     }
 
     abstract public static function getName(): string;
