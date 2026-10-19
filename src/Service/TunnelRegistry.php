@@ -21,7 +21,7 @@ class TunnelRegistry
     /**
      * @var array<string, AbstractTunnelManagerService>
      */
-    private array $tunnels = [];
+    private readonly array $tunnels;
 
     /**
      * @param iterable<AbstractTunnelManagerService> $tunnels
@@ -31,9 +31,12 @@ class TunnelRegistry
         iterable $tunnels,
         private readonly TunnelSessionService $sessionService,
     ) {
+        $byName = [];
         foreach ($tunnels as $tunnel) {
-            $this->tunnels[$tunnel::getName()] = $tunnel;
+            $byName[$tunnel::getName()] = $tunnel;
         }
+
+        $this->tunnels = $byName;
     }
 
     /**
