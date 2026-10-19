@@ -5,6 +5,7 @@ namespace Wexample\SymfonyTunnels\Service;
 use LogicException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Contracts\Service\ResetInterface;
 use Wexample\SymfonyHelpers\Entity\AbstractEntity;
 use Wexample\SymfonyTunnels\Class\TunnelCursor;
 use Wexample\SymfonyTunnels\Entity\TunnelSession;
@@ -13,7 +14,6 @@ use Wexample\SymfonyTunnels\Exception\TunnelCycleException;
 use Wexample\SymfonyTunnels\Exception\TunnelInitVariableException;
 use Wexample\SymfonyTunnels\Interface\TunnelSessionStorageInterface;
 use Wexample\SymfonyTunnels\Service\Step\AbstractTunnelStep;
-use Symfony\Contracts\Service\ResetInterface;
 
 /**
  * One tunnel: its tree of cursors, the session being walked, and what that

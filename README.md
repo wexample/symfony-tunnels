@@ -1,6 +1,6 @@
 # symfony_tunnels
 
-Version: 10.0.7
+Version: 11.0.0
 
 `symfony-tunnels` is a Symfony bundle for multi-step flows — "tunnels" — that branch. A tunnel is declared as a tree of steps: each step lists what may follow it, the same step can appear on several branches with different options, and every position in that tree is a cursor with a stable hash. The engine keeps the visitor's progress in the database (`TunnelSession`, `TunnelSessionVariable`), decides from the URL, the query options and the path already walked which cursor a request is about, sends the visitor back when an earlier step is unfinished, and drops what an abandoned branch had stored when they go back and take another one. Controllers only declare their entry point with `#[TunnelRoute]`; rendering goes through `symfony-loader`, and the navigation feeds the design system stepper. It targets checkout, onboarding or questionnaire flows whose next step depends on earlier answers.
 
@@ -103,18 +103,16 @@ This package is part of the Wexample Suite — a collection of high-quality, mod
 
 The suite includes packages for configuration management, file handling, prompts, and more. Each package can be used independently or as part of the integrated suite.
 
-Visit the [Wexample Suite documentation](https://docs.wexample.com) for the complete package ecosystem.
-
 ## Dependencies
 
 - php: >=8.5
 - doctrine/orm: ^3.0
-- wexample/symfony-helpers: >=16.0.0
-- wexample/symfony-forms: >=12.0.0
-- wexample/symfony-translations: >=13.0.0
+- wexample/symfony-helpers: >=17.0.0
+- wexample/symfony-forms: >=13.0.0
+- wexample/symfony-translations: >=14.0.0
 - wexample/php-pseudocode: >=2.2.0
-- wexample/symfony-pseudocode: >=3.0.0
-- wexample/symfony-seo: >=5.0.0
+- wexample/symfony-pseudocode: >=4.0.0
+- wexample/symfony-seo: >=6.0.0
 - symfony/form: ^7.4
 - symfony/scheduler: ^7.4 || ^8.0
 - symfony/messenger: ^7.4 || ^8.0
@@ -142,6 +140,8 @@ Free to use in both personal and commercial projects.
 This packages suite embodies this spirit. Trusted by professionals and enthusiasts alike, it delivers a consistent, high-quality foundation for modern development — open, elegant, and battle-tested. Its reputation is built on years of collaboration, refinement, and rigorous attention to detail, making it a natural choice for those who demand both robustness and beauty in their tools.
 
 Wexample cultivates a culture of mastery. Each package, each contribution carries the mark of a community that values precision, ethics, and innovation — a community proud to shape the future of digital craftsmanship.
+
+Built and maintained by [Romain Weeger](https://weeger.io).
 
 ## Migration Notes
 
