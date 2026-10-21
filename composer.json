@@ -3,7 +3,7 @@
   "description": "A tunnels service for Symfony",
   "type": "library",
   "license": "MIT",
-  "version": "11.0.2",
+  "version": "11.0.3",
   "autoload": {
     "psr-4": {
       "Wexample\\SymfonyTunnels\\": "src/"
@@ -25,10 +25,10 @@
     "doctrine/orm": "^3.0",
     "wexample/symfony-helpers": ">=18.0.0",
     "wexample/symfony-forms": ">=14.0.0",
-    "wexample/symfony-translations": ">=16.0.0",
+    "wexample/symfony-translations": ">=17.0.0",
     "wexample/php-pseudocode": ">=2.2.0",
     "wexample/symfony-pseudocode": ">=4.0.0",
-    "wexample/symfony-seo": ">=9.0.0",
+    "wexample/symfony-seo": ">=10.0.0",
     "symfony/form": "^7.4",
     "symfony/scheduler": "^7.4 || ^8.0",
     "symfony/messenger": "^7.4 || ^8.0"
