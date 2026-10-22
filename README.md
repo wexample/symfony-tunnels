@@ -1,150 +1,17 @@
 # symfony_tunnels
 
-Version: 11.0.4
+Version: 11.0.5
 
-`symfony-tunnels` is a Symfony bundle for multi-step flows — "tunnels" — that branch. A tunnel is declared as a tree of steps: each step lists what may follow it, the same step can appear on several branches with different options, and every position in that tree is a cursor with a stable hash. The engine keeps the visitor's progress in the database (`TunnelSession`, `TunnelSessionVariable`), decides from the URL, the query options and the path already walked which cursor a request is about, sends the visitor back when an earlier step is unfinished, and drops what an abandoned branch had stored when they go back and take another one. Controllers only declare their entry point with `#[TunnelRoute]`; rendering goes through `symfony-loader`, and the navigation feeds the design system stepper. It targets checkout, onboarding or questionnaire flows whose next step depends on earlier answers.
+A tunnels service for Symfony
 
 ## Table of Contents
 
-- [Architecture](#architecture)
-- [Integration in the Suite](#integration-in-the-suite)
-- [Dependencies](#dependencies)
-- [Versioning & Compatibility Policy](#versioning--compatibility-policy)
-- [License](#license)
-- [About us](#about-us)
-- [Migration Notes](#migration-notes)
+- [Introduction](#introduction)
 
-## Architecture
+# wexample/symfony-tunnels
 
-A tunnel is a tree built fresh at every request from service declarations, walked by a visitor whose progress lives in the database. The sections below follow a request through the layers, from the bundle wiring to the rendered step.
+Version: 1.0.85
 
-### Bundle and dependency injection
+A tunnels service for Symfony
 
-src/WexampleSymfonyTunnelsBundle.php implements `LoaderBundleInterface`, so its `assets/` directory — partials and translations — is reachable as `@WexampleSymfonyTunnelsBundle/…`, and `PseudocodeBundleInterface`, so its entities are exported to TypeScript. On `build()` it registers src/DependencyInjection/Compiler/TunnelControllersCompilerPass.php.
-
-src/DependencyInjection/WexampleSymfonyTunnelsExtension.php loads src/Resources/config/services.yaml and registers two autoconfiguration rules, because tunnels and their controllers live in applications, outside this bundle's own services: every `AbstractTunnelManagerService` gets the tag `wexample.symfony_tunnels.tunnel`, every `AbstractTunnelController` the tag `wexample.symfony_tunnels.controller`.
-
-src/Service/TunnelRegistry.php receives the tagged managers and indexes them by name. The compiler pass turns the tagged controllers into a list of class names, the `wexample_symfony_tunnels.controllers` parameter, so that loading routes reads attributes without building controllers.
-
-### Tree: cursors and steps
-
-src/Service/Step/AbstractTunnelStep.php is the base of every step. A step is a shared service and holds no state: every hook receives the cursor it acts on. `getAllowedNextSteps()` lists what may follow, either a step or `['step' => …, 'options' => […], 'name' => …]`; every ancestor may rewrite that list through `alterNextStepAllowedFollowings()`.
-
-src/Service/AbstractTunnelManagerService.php names a tunnel and its entrypoint step. `createEntrypoint()` asks the entrypoint step for its cursor, which recursively creates the whole tree. A step reached by two paths gives two cursors: the structure is a tree, not a graph. The manager registers each cursor by hash and refuses one whose step and options already appear above it, throwing src/Exception/TunnelCycleException.php.
-
-src/Class/TunnelCursor.php is one node: a step, its options, its parent and children, and a hash built from the manager class, the step class, the parent hash and the options. The hash is stable across requests, which is what makes it the key of everything stored for the cursor. The cursor also carries the tree walks (`forEachPreviousRecursive`, `forEachCursorBetween`…), the option matching (`hasOptions` for "at least these", `hasSameOptions` for "exactly these"), and the completion flag, a cursor variable named `tunnel-step-complete`.
-
-The manager is the one stateful object of a request: it holds the cursors, the current cursor and the session. It is not shared between tunnels.
-
-### Session and variables
-
-src/Entity/TunnelSession.php is one walk through one tunnel: its name, a status from src/Enum/TunnelSessionStatus.php, a 32-character random resume hash, the last cursor displayed, the visitor's security identifier when there is one, and the variables. src/Entity/TunnelSessionVariable.php holds one JSON value, scoped to a cursor hash or, when that hash is null, to the whole session; the two scopes never overlap. `initial` marks the values the tunnel was opened with.
-
-The engine reaches that storage through src/Interface/TunnelSessionStorageInterface.php, implemented by src/Service/TunnelSessionService.php. The indirection is what lets the unit tests run the engine on an in-memory storage.
-
-`TunnelSessionService::findOrCreateSession()` looks for the session a request belongs to: the one its `?tunnel=` hash names, then the one the browser session remembers, then a new one. A found session is reused only for the same tunnel and the same user identifier, and only while it is not expired. A session carries its own `dateExpiration`: born a day ahead (`TunnelSession::DEFAULT_EXPIRATION`), it is pushed back every time a step is displayed, by what that step asks in `getSessionExpiration()` — the tunnel's `getSessionExpiration()` by default, minutes for a step holding a stock. Only opened sessions expire, completed and pending ones never do. `initCursorSession()` starts over when the step asks for it (`tunnelSessionRecreate()`, true for a completed session by default).
-
-`purgeExpiredSessions()` drops expired sessions after letting every step clean up in `onSessionDestroy()`. It never runs in a visitor's request: `TunnelRegistry::purgeExpiredSessions()` is a `scheduler.task` every `TunnelRegistry::PURGE_FREQUENCY` (15 minutes), declared in `services.yaml` rather than by `#[AsPeriodicTask]` so that an application linking the package before installing `symfony/scheduler` still compiles. It needs the application to consume the `scheduler_default` transport (`messenger:consume scheduler_default`); `tunnels:purge` runs it by hand.
-
-The values a tunnel is opened with are declared in `getInitVariablesConfig()` (`type`, `required`, `default`, `autoInit`), checked by `setInitialVariables()`, and stored as initial variables — entities as their identifier. `autoInitVariables()` rebuilds them from a session without a request.
-
-### Routing
-
-src/Attribute/TunnelRoute.php marks a controller action as a tunnel entry point. src/Routing/TunnelRouteLoader.php, a `tunnel_routes` loader built on `symfony-helpers`' `AbstractRouteLoader`, turns each one into a route; where it lives and how it is named is src/Helper/TunnelRouteHelper.php's call. A controller carrying a class-level `#[Route]` mounts the tunnel inside its pages: the route is named `<class name prefix><name>` on `<class path>/<name>/<prefix>/{step?}/<suffix>`, so URLs, route names, the menu and the breadcrumb read the same tree as the pages around it. Without one, the route stands apart, named `tunnel_<tunnel>_<name>` on `/tunnel/<controller>/…`. The name is left out of the path for `index`. The application imports the loader with src/Resources/config/routes.yaml.
-
-src/Service/TunnelRoutingService.php builds the URL of a cursor: the tunnel route — of the controller the request walks it through, when several mount the same tunnel — the route params of the manager and the step (`step=<name>` by default), and the options under `cursor-options` when the cursor has some.
-
-### Request
-
-src/Controller/AbstractTunnelController.php extends `symfony-loader`'s `AbstractPagesController`. `handleTunnelRequest()`:
-
-1. Finds the manager in the registry, builds the tree and applies the opening values — a mismatch is a 404.
-2. Finds or creates the session and hands it to the manager.
-3. Guesses the cursor: every cursor whose route params the request carries is a candidate, and `AbstractTunnelManagerService::selectCurrentCursor()` narrows them down with the step's own veto, the query options, the path from the last cursor displayed and the branch it had recorded (`redirects-to`), then keeps the one closest to the root.
-4. Without a cursor, redirects to the entrypoint when no step was named, and answers 404 when one was.
-5. Asks the step whether it `needsRedirect()`. A `RedirectResponse` is returned as is; a cursor becomes a redirect to its URL, after completing the step if its strategy completes on redirect. Every redirect keeps `__layout`, so a tunnel opened in a modal stays in it.
-6. Otherwise calls `initAsCurrentStep()` and renders `tunnels/<tunnel>/<step>` from the controller's front directory, with `tunnel`, `tunnelStep` and `tunnelCursor`.
-
-`initAsCurrentStep()` is where the rules of the path apply: it records the last cursor displayed, notifies the ancestors, completes a parent waiting for its child (`ON_NEXT_INIT`), and when the step had already sent the visitor down a branch, calls `onPreviousStepLoading()` on it — which by default drops every cursor variable of that branch. Then it applies the step's own strategy from src/Enum/TunnelStepCompleteStrategy.php.
-
-### Form steps
-
-src/Service/Step/AbstractFormTunnelStep.php is a step showing a form, completed only when the form is (`MANUAL` strategy). It names an ordinary `symfony-forms` processor through `getFormProcessor()`, which does what a valid submission means for the application, and gives the form its starting data through `buildFormData()`. The step itself only says where the tunnel goes next, in `onFormValid()`: by default it marks itself complete and returns the next cursor, while returning null keeps the visitor on the step.
-
-`AbstractTunnelController::handleFormStep()` shows the form on GET. On POST it lets the processor handle the submission, asks the processor whether the form is valid — the same check that decides whether its own `onValid()` runs — and turns the step's answer into the processor's success action: `embed_redirect` to the next cursor when the request comes from a modal, panel or overlay, `redirect` otherwise, `embed_stay` when the step returned null. A JSON request gets the payload of `symfony-forms`' `FormResponsePayloadBuilder`; a page request gets a redirect, or the form again with its errors. The form posts back to the step URL, so its class must not set `$ajax = true`.
-
-### Asynchronous resume
-
-src/Service/TunnelResumeService.php takes up a flow left waiting on an outside event — a payment confirmed by a webhook — with no visitor and no URL. The waiting step sets its session to `pending_async_action` and keeps the identifier the event will carry as a variable. The application's event handler calls `resumeByVariable($name, $value, $onCursor)`, which finds every pending session holding that value, rebuilds its tunnel, restores its opening values through `autoInitVariables()`, and hands the cursor the variable belongs to to the callback.
-
-### Access rules
-
-`AbstractTunnelStep::needsRedirect()` sends the visitor to the direct parent when it is incomplete, unless that parent completes on its child, then to the first incomplete ancestor under the default strategy of src/Enum/TunnelStepRedirectStrategy.php.
-
-`allowDirectAccess()` decides whether a link is offered: a target whose `tunnelSessionRecreate()` would start the session over — any step of a closed session, by default — is never linked, any cursor between the two ends can veto it through `allowAccessOf()`, and a link forward requires every ancestor of the target to be complete, so it never leads to a redirect back.
-
-### Navigation and tooling
-
-src/Helper/TunnelTreeHelper.php reads a built tree: its root-to-leaf paths, its map of sections (one row per step and options, in an order every path agrees with), and the known steps around a cursor — the step groups every remaining path goes through, with a null where paths diverge. src/Class/TunnelNavigationItem.php and src/Class/TunnelTreeSection.php carry the results.
-
-src/Twig/TunnelExtension.php exposes `tunnel_cursor_url`, `tunnel_entrypoint_url` — the first step of a tunnel, for a link into it from outside —, `tunnel_stepper` — the options of the design system stepper, a divergence becoming an `unknown` step, and a step every path goes through under several variants being labelled by `buildGroupLabel()` until one is picked — `tunnel_timeline` — the options of the design system timeline for the path walked, the ancestors of the cursor, each step adding what was done on it through `buildSummary()` — and `tunnel_previous_url` / `tunnel_next_url`. The partials assets/partials/tunnel-navigation.html.twig, assets/partials/tunnel-timeline.html.twig and assets/partials/tunnel-buttons.html.twig use them.
-
-src/Service/TunnelTracingService.php draws the tree and the map as text for src/Command/InfoCommand.php, `tunnels:info <name>`.
-
-### Tests
-
-`tests/Fixtures/App` is a kernel on in-memory SQLite with the loader, translations, forms and tunnels bundles. `tests/Fixtures/Tunnel` holds the test tunnel ported from the legacy code, the executable specification of the engine: step two appears three times with different options, step three bis three times as named variants, and the steps exercise every completion strategy, internal and external redirects, a direct-access veto and a branch reset. A second, two-step tunnel in `tests/Fixtures/Tunnel/FormTunnel` covers form steps. `tests/Unit` runs the engine on the in-memory storage; `tests/Integration` runs it on the database and over HTTP.
-
-## Integration in the Suite
-
-This package is part of the Wexample Suite — a collection of high-quality, modular tools designed to work seamlessly together across multiple languages and environments.
-
-### Related Packages
-
-The suite includes packages for configuration management, file handling, prompts, and more. Each package can be used independently or as part of the integrated suite.
-
-## Dependencies
-
-- php: >=8.5
-- doctrine/orm: ^3.0
-- wexample/symfony-helpers: >=18.0.0
-- wexample/symfony-forms: >=14.0.0
-- wexample/symfony-translations: >=17.0.0
-- wexample/php-pseudocode: >=2.2.0
-- wexample/symfony-pseudocode: >=4.0.0
-- wexample/symfony-seo: >=11.0.0
-- symfony/form: ^7.4
-- symfony/scheduler: ^7.4 || ^8.0
-- symfony/messenger: ^7.4 || ^8.0
-
-## Versioning & Compatibility Policy
-
-Wexample packages follow **Semantic Versioning** (SemVer):
-
-- **MAJOR**: Breaking changes
-- **MINOR**: New features, backward compatible
-- **PATCH**: Bug fixes, backward compatible
-
-We maintain backward compatibility within major versions and provide clear migration guides for breaking changes.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-Free to use in both personal and commercial projects.
-
-## About us
-
-[Wexample](https://wexample.com) stands as a cornerstone of the digital ecosystem — a collective of seasoned engineers, researchers, and creators driven by a relentless pursuit of technological excellence. More than a media platform, it has grown into a vibrant community where innovation meets craftsmanship, and where every line of code reflects a commitment to clarity, durability, and shared intelligence.
-
-This packages suite embodies this spirit. Trusted by professionals and enthusiasts alike, it delivers a consistent, high-quality foundation for modern development — open, elegant, and battle-tested. Its reputation is built on years of collaboration, refinement, and rigorous attention to detail, making it a natural choice for those who demand both robustness and beauty in their tools.
-
-Wexample cultivates a culture of mastery. Each package, each contribution carries the mark of a community that values precision, ethics, and innovation — a community proud to shape the future of digital craftsmanship.
-
-Built and maintained by [Romain Weeger](https://weeger.io).
-
-## Migration Notes
-
-When upgrading between major versions, refer to the migration guides in the documentation.
-
-Breaking changes are clearly documented with upgrade paths and examples.
+## Table of Contents
