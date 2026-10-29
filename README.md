@@ -1,6 +1,6 @@
 # symfony_tunnels
 
-Version: 11.0.6
+Version: 11.0.7
 
 A tunnels service for Symfony
 
